@@ -1,9 +1,44 @@
 //creating a party
 
 var party = [];             // array of party members
-var state = 1;              // 0 - management    1 - combat_skill_select    2 - combat_enemy_select    3 - story
+var state = 0;              // 0 - management    1 - combat_skill_select    2 - combat_enemy_select    3 - story
 var select_x = 0;           // select on x axis
 var select_y = 0;           // select on y axis (it's easier this way)
+
+
+function createManagementPanel() {
+    if (panel != null) {
+        panel.remove();
+    }    
+    panel = document.createElement("div");
+    let fade = document.createElement("div");
+    panel.style.left = "0px";
+    panel.style.width = window.innerWidth * 0.4 + "px";
+    panel.style.height = window.innerHeight + "px";
+    panel.style.top = "0px";
+    panel.style.backgroundColor = "rgba(6, 6, 12, 0.8)";
+
+    fade.style.left = window.innerWidth * 0.4 + "px";
+    fade.style.width = window.innerWidth * 0.1 + "px";
+    fade.style.height = window.innerHeight + "px";
+    fade.style.top = "0px";
+    fade.style.background = " linear-gradient(to right, rgba(6, 6, 12, 0.8), transparent)";
+    
+    document.body.appendChild(panel);
+    document.body.appendChild(fade);
+
+    let textBox = document.createElement("p");
+    textBox.id = "text-cont";
+    textBox.style.fontSize = "30px";
+    textBox.style.fontFamily = "Lucida Sans";
+    textBox.style.color = "rgb(135, 110, 70)";
+    textBox.style.paddingLeft = "35px"
+
+    panel.appendChild(textBox);
+
+    textBox.innerHTML = "TEKST";
+}
+createManagementPanel();
 
 function ally(name, hp, skills) {
     this.name = name;
@@ -22,10 +57,12 @@ var panel;
 var party_panel;
 var skill_panel;
 
-function createPanel() {    //creating a panel
+function createCombatPanel() {    //creating a panel for combat choices
+    if (panel != null) {
+        panel.remove();
+    }
     panel = document.createElement("div");
      
-    panel.style.position = "absolute";
     panel.style.left = "0px";
     panel.style.width = window.innerWidth + "px";
     panel.style.height = window.innerHeight * 0.3 + "px";
@@ -48,8 +85,8 @@ function createPanel() {    //creating a panel
     skill_panel.style.width = window.innerWidth * 0.7 + "px";
     skill_panel.style.borderLeft = "10px solid black";
     panel.appendChild(skill_panel);
-} //createPanel
-createPanel();
+} //createConbatPanel
+//createCombatPanel();
 
 var skill_select = 0;
 
@@ -71,7 +108,7 @@ function partyUpdate() {    //updating party members
         skill_panel.innerHTML += "<br>";
     }
 } //partyUpdate
-partyUpdate();
+//partyUpdate();
 
 function limb(name, hp, id, x, y) {
     this.name = name;
@@ -155,6 +192,8 @@ document.addEventListener('keydown', function (event) {
                 }
                 boss[enemy_select].div.style.border = null;
                 state = 1;
+                select_x = 0;
+                partyUpdate();
                 break;
             case 1:
                 if (select_x == 1) {        //space in combat menu
@@ -164,4 +203,3 @@ document.addEventListener('keydown', function (event) {
                 }
         }   
 }});
-test();
