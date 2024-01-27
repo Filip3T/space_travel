@@ -1,11 +1,12 @@
 //creating a party
 
 var party = [];             // array of party members
-var state = 1;              // 0 - management    1 - combat_skill_select    2 - combat_enemy_select    3 - story
+var state = 0;              // 0 - management    1 - combat_skill_select    2 - combat_enemy_select    3 - story
 var select_x = 0;           // select on x axis
-var select_y = 0;           // select on y axis (it's easier this way)
+var select_y = 1;           // select on y axis (it's easier this way)
 
 var panel;
+var day = 1;
 
 var bars = ["stan statku", "morale", "paliwo", "racje"];
 var buttons = ["napraw", "kup", "pracuj", "ekwipunek"];
@@ -29,8 +30,8 @@ function createManagementPanel() {
     fade.style.top = "0px";
     fade.style.background = "linear-gradient(to right, rgba(6, 6, 12, 0.5), transparent)";
     
-    document.body.appendChild(panel);
-    document.body.appendChild(fade);
+    document.getElementById('main').appendChild(panel);
+    document.getElementById('main').appendChild(fade);
 
     let textBox = document.createElement("p");
     textBox.id = "text-cont";
@@ -60,38 +61,56 @@ function createManagementPanel() {
         textBox.innerHTML += "<br>"
     }
 
-    textBox.innerHTML += "<p style='text-align: center; width: 82%; font-size: 40px; margin: 0px;'>Dzien:</p>";
+    textBox.innerHTML += "<p style='text-align: center; width: 88%; font-size: 40px; margin: 0px;'>Dzień:</p>";
 
+    
     let day = document.createElement("div");
     day.style.width = "90%";
     day.style.height = "100px";
     day.style.fontSize = "70px";
     day.style.margin = "0px";
+    day.style.left = "7%";
     day.style.background = "linear-gradient(0.25turn, transparent, rgba(135, 110, 70, 0.1), transparent)";
-    day.innerHTML = "<p id='day-transparent'>&emsp;&emsp;&emsp;&emsp;0&emsp;&emsp;1&emsp;&emsp;2</p>";
+    day.innerHTML = "<p id='day-transparent'>&emsp;&emsp;&emsp;&emsp;1&emsp;&ensp;2&emsp;&ensp;3</p>";
     textBox.appendChild(day);
 
     let cordsY = [110, 210, 110, 210];
-    let cordsX = [0, 150, 300, 450];
+    let cordsX = [0, window.innerWidth / 12.4, 2 * window.innerWidth / 12.4, 3 * window.innerWidth / 12.4];
 
     for(j=0;j<4;j++) {
         let button = document.createElement("div");
-        button.style.borderRadius = "40px";
+        button.style.borderRadius = "30px";
         button.style.marginLeft = cordsX[j] + "px";
         button.style.marginTop = cordsY[j] + "px";
         button.style.height = "90px";
-        button.style.width = "150px";
+        button.style.width = window.innerWidth / 12.4 + "px";
         button.style.fontSize = "25px";
-        button.style.border = "3px solid rgb(107, 87, 70)";
+        button.style.border = "5px solid rgb(107, 87, 70)";
         button.style.display = "flex";
         button.style.alignItems = "center"; 
         button.style.justifyContent = "center"; 
 
         button.innerHTML = buttons[j];
-        button.id = buttons[j];
+        button.id = "button-" + j;
         textBox.appendChild(button);
+
+        
     } 
 
+    let button = document.createElement("div");
+    button.style.borderRadius = "30px";
+    button.style.border = "5px solid rgb(197, 173, 137)";
+    button.style.height = "90px";
+    button.style.width = "80%";
+    button.style.display = "flex";
+    button.style.alignItems = "center"; 
+    button.style.justifyContent = "center";
+    button.id = "next_day";
+    button.innerHTML = "Nastepny dzien";
+    button.style.top = window.innerHeight * 0.85 + "px";
+    button.style.left = window.innerWidth * 0.016 + "px";
+
+    textBox.appendChild(button);
 
 } //createManagementPanel
 createManagementPanel();
@@ -132,7 +151,7 @@ function createCombatPanel() {    //creating a panel for combat choices
     panel.style.top = window.innerHeight * 0.7 + "px";
     panel.style.borderTop = "10px solid black";
     panel.style.fontSize = "30px";
-    document.body.appendChild(panel);
+    document.getElementById('main').appendChild(panel);
 
     party_panel = document.createElement("div");
     party_panel.style.position = "absolute";
@@ -187,7 +206,7 @@ function limb(name, hp, id, x, y) {
     graphic.style.left = x+"px";
     graphic.style.top = y+"px";
 
-    document.body.appendChild(graphic)
+    document.getElementById('main').appendChild(graphic)
 
     this.div = graphic;
 } //creating a boss's limb
@@ -208,46 +227,109 @@ var enemy_select = 0; //stores selected enemy
 document.addEventListener('keydown', function (event) {
     if (event.keyCode == 39) {        // Right
         switch(state) {
+            case 0: //right in management menu
+                if (select_x < 3 && select_y == 0) {
+                    document.getElementById("button-" + select_x).style.border = "5px solid rgb(107, 87, 70)";
+                    select_x += 1;
+                    document.getElementById("button-" + select_x).style.border = "5px solid rgb(197, 173, 137)";
+                } 
+                break;
             case 1: //right in combat menu
                 if (select_x == 0) select_x = 1;
+                partyUpdate();
                 break;
             case 2: // right in enemy select
                 if (enemy_select < boss.length - 1) enemy_select += 1;
                 boss[enemy_select-1].div.style.border = null;
                 boss[enemy_select].div.style.border = "3px solid black";
+                partyUpdate();
         }
-        partyUpdate();
     } else if (event.keyCode == 40) { // down
         switch(state) {
+            case 0: //down in management menu
+                if (select_y == 0) {
+                    select_y = 1;
+                    document.getElementById("button-" + select_x).style.border = "5px solid rgb(107, 87, 70)";
+                    document.getElementById("next_day").style.border = "5px solid rgb(197, 173, 137)";
+
+                }
+                break;
             case 1:     //down in combat menu
                 if (select_y < party.length - 1 && select_x == 0) {
                     select_y += 1;
                 } else if (skill_select < party[select_y].skills.length - 1 && select_x == 1) {
                     skill_select += 1;
                 }
+                partyUpdate();
         }
-        partyUpdate();
+
     } else if (event.keyCode == 37) { // Left
         switch(state) {
+            case 0:
+                if (select_x >= 1 && select_y == 0) {
+                    document.getElementById("button-" + select_x).style.border = "5px solid rgb(107, 87, 70)";
+                    select_x -= 1;
+                    document.getElementById("button-" + select_x).style.border = "5px solid rgb(197, 173, 137)";
+                }
+                break;
             case 1:     //left in combat menu
                 if (select_x == 1) select_x = 0;
+                partyUpdate();
                 break;
             case 2:     //left in enemy selection
                 if (enemy_select != 0) enemy_select -= 1;
                 boss[enemy_select+1].div.style.border = null;
                 boss[enemy_select].div.style.border = "3px solid black";
+                partyUpdate();
         }
-        partyUpdate();
+        
     } else if (event.keyCode == 38) { // Up
         switch(state) {
+            case 0: //up in management menu
+                case 0:
+                if (select_y == 1) {
+                    select_y = 0;
+                    document.getElementById("button-" + select_x).style.border = "5px solid rgb(197, 173, 137)"; 
+                    document.getElementById("next_day").style.border = "5px solid rgb(107, 87, 70)";
+
+                }
+                break;
             case 1:     //up in combat menu
                 if (select_y != 0 && select_x == 0) {
                     select_y -= 1;
                 } else if (skill_select != 0 && state == 1) skill_select -= 1;
+                partyUpdate();
         }
-        partyUpdate();
+        
     } else if (event.keyCode == 32) { //Space
         switch(state) {
+            case 0:     //space in management menu
+                if (select_y == 1) {
+                    let fade = document.getElementById('fade');
+                    fade.style.backgroundColor = "black";
+    
+                    day += 1;
+                    fade.innerHTML = "DZIEŃ " + day;
+
+                    setTimeout(() => {
+                        fade.style.backgroundColor = "transparent";
+                        let cday = this.getElementById('day-transparent');
+                        if (day == 5) {
+                            cday.innerHTML = (day - 2) + "&emsp;&ensp;" + (day - 1) + "&emsp;&ensp;" + day + "&emsp;&ensp;" +
+                            (day + 1) + "&emsp;&ensp;<span style='color: red;'>7</span>";
+                        } else if (day == 6) {
+                            cday.innerHTML = (day - 2) + "&emsp;&ensp;" + (day - 1) + "&emsp;&ensp;" + day + "&emsp;&ensp;<span style='color: red;'>7</span>&emsp;&ensp;";
+                        } else {
+                            cday.innerHTML = (day - 2) + "&emsp;&ensp;" + (day - 1) + "&emsp;&ensp;" + day + "&emsp;&ensp;" +
+                            (day + 1) + "&emsp;&ensp;" + (day + 2);
+                        }
+                    }, 2000);
+                    setTimeout(() => {
+                        fade.innerHTML = "";
+                    }, 3000);
+
+                }
+                break;
             case 2:     //space in enemy selection
                 if (boss[enemy_select].hp > 10){
                     boss[enemy_select].hp -= 10;

@@ -11,11 +11,15 @@
             background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-top: 0px;
+            white-space: nowrap;
+            position: absolute;
+            left: 0px;
         }
     </style>
 </head>
 <body style="overflow: hidden; background-image: url('background.png'); color: rgb(107, 87, 70); font-family: Trebuchet MS; line-height: 1.5;">
-    
+    <div id="main"></div>
+    <div style="position: absolute; left: 0px; top: 0px; height: 100%; width: 100%; transition:background-color 1000ms linear; background-color: transparent; font-size: 10vw; display: flex; align-items: center; justify-content: center; color: white; background-size: cover; mix-blend-mode: multiply;" id = "fade"></div>
     <script src = projekt_js.js></script>
 </body>
 </html>
