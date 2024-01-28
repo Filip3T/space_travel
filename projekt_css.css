@@ -61,3 +61,35 @@ span {
     font-size: 40px;
     text-align: right;
 }
+#combat-panel {
+    left: 0px;
+    width: 100vw;
+    height: 30vw;
+    background: rgba(6, 6, 12, 0.7);
+    font-size: 30px;
+}
+#combat-fade {
+    width: 100vw;
+    height: 150px;
+    left: 0px;
+    background: linear-gradient(to top, rgba(6, 6, 12, 0.7), transparent);
+}
+#party-panel {
+    left: 0px;
+    height: 30vw;
+    width: 20vw;
+    line-height: 50px;
+    font-size: 24px;
+    margin-left: 15px;
+}
+#skill-panel {
+    height: 30vw;
+    width: 70vw;
+    line-height: 50px;
+    font-size: 24px;
+}
+#panel-line {
+    height: 30vw;
+    width: 1.6vw;
+    background: linear-gradient(to top, rgb(107, 87, 70), transparent);
+}

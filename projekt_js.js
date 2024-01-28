@@ -1,7 +1,7 @@
 //creating a party
 
 var party = [];             // array of party members
-var state = 0;              // 0 - management    1 - combat_skill_select    2 - combat_enemy_select    3 - story
+var state = 0;              // 0 - management    1 - combat_skill_select    2 - combat_enemy_select    3 - story    4 - store
 var select_x = 0;           // select on x axis
 var select_y = 1;           // select on y axis (it's easier this way)
 
@@ -10,7 +10,7 @@ var dayOfJourney = 1;
 
 var bars = ["stan statku", "morale", "paliwo", "racje"];
 var buttons = ["napraw", "kup", "pracuj", "ekwipunek"];
-var statek = [1000, 750, 500, 500, 100000]; // stan, morale, paliwo, racje, pieniadze
+var statek = [1000, 750, 500, 500, 1000]; // stan, morale, paliwo, racje, pieniadze
 
 function createManagementPanel() {
     if (panel != null) {
@@ -111,9 +111,33 @@ function createManagementPanel() {
 createManagementPanel();
 
 function updateManagementPanel() {
-    for (i=0;i<4;i++) {
-        let focus = document.getElementById(bars[i] + '-status');
-        focus.style.width = statek[i] / 10 + "%";
+    if(statek[0] <= 0) {
+        panel.innerHTML = "STATEK ZOSTAL ZNISZCZONY!!! KONIEC!!!";
+        state = 4;
+    } else if (statek[1] <= 0) {
+        panel.innerHTML = "CALA ZALOGA CIE OPUSZCZA!!! KONIEC!!!";
+        state = 4;
+    } else if (statek[2] <= 0) {
+        panel.innerHTML = "SKONCZLYLO SIE PALIWO!!! KONIEC!!!";
+        state = 4;
+    } else if (statek[3] <= 0) {
+        panel.innerHTML = "SKONCZYLY SIE RACJE!!! KONIEC!!!";
+        state = 4;
+    }
+    if(statek[0] >= 1000) {
+        statek[0] = 1000;
+    } else if (statek[1] > 1000) {
+        statek[1] = 1000;
+    } else if (statek[2] > 1000) {
+        statek[2] = 1000;
+    } else if (statek[3] > 1000) {
+        statek[3] = 1000;
+    }
+    if (state == 0) {
+        for (i=0;i<4;i++) {
+            let focus = document.getElementById(bars[i] + '-status');
+            focus.style.width = statek[i] / 10 + "%";
+        }
     }
 } //updateManagementPanel
 updateManagementPanel();
@@ -139,28 +163,33 @@ function createCombatPanel() {    //creating a panel for combat choices
         panel.remove();
     }
     panel = document.createElement("div");
-     
-    panel.style.left = "0px";
-    panel.style.width = window.innerWidth + "px";
-    panel.style.height = window.innerHeight * 0.3 + "px";
+    
     panel.style.top = window.innerHeight * 0.7 + "px";
-    panel.style.borderTop = "10px solid black";
-    panel.style.fontSize = "30px";
+    panel.id = "combat-panel";
     document.getElementById('main').appendChild(panel);
 
+    let fade_combat = document.createElement('div');
+    fade_combat.id = "combat-fade";
+    fade_combat.style.top = window.innerHeight * 0.7 - 150 + 'px';
+    document.getElementById('main').appendChild(fade_combat);
+
+    let panel_combat_line = document.createElement('div');
+    panel_combat_line.id = "panel-line";
+    panel_combat_line.style.left = window.innerWidth * 0.175 + "px";
+    panel.appendChild(panel_combat_line);
+    panel_combat_line = document.createElement('div');
+    panel_combat_line.id = "panel-line";
+    panel_combat_line.style.left = window.innerWidth * 0.5 + "px";
+    panel.appendChild(panel_combat_line);
+
     party_panel = document.createElement("div");
-    party_panel.style.position = "absolute";
-    party_panel.style.left = "0px";
-    party_panel.style.height = window.innerHeight * 0.3 + "px";
-    party_panel.style.width = window.innerWidth * 0.2 + "px";
+    party_panel.id = "party-panel";
     panel.appendChild(party_panel);
 
     skill_panel = document.createElement("div");
     skill_panel.style.position = "absolute";
-    skill_panel.style.height = window.innerHeight * 0.3 + "px";
+    skill_panel.id = "skill-panel";
     skill_panel.style.left = window.innerWidth * 0.2 + "px";
-    skill_panel.style.width = window.innerWidth * 0.7 + "px";
-    skill_panel.style.borderLeft = "10px solid black";
     panel.appendChild(skill_panel);
 } //createConbatPanel
 //createCombatPanel();
@@ -168,19 +197,32 @@ function createCombatPanel() {    //creating a panel for combat choices
 var skill_select = 0;
 
 function partyUpdate() {    //updating party members
-    party_panel.innerHTML = "";
+    let progressBar = document.createElement('div');
+    progressBar.style.height = "10px";
+    progressBar.classList.add('progress-bar');
+    let status = document.createElement('div');
+    status.style.height = "10px";
+    status.classList.add('progress-bar-status')
+
+    party_panel.innerHTML = "Party:<br>";
     for(i=0;i<party.length;i++) {
-        party_panel.innerHTML += party[i].name + " ( " + party[i].hp + " / " + party[i].maxhp + " ) ";
+        
         if (select_y == i && select_x == 0) {
-            party_panel.innerHTML += " <<< ";
+            party_panel.innerHTML += "<span style='color: rgb(197, 173, 137);'>" + party[i].name + "</span>";
+        } else {
+            party_panel.innerHTML += party[i].name;
         }
         party_panel.innerHTML += "<br>";
+        party_panel.appendChild(progressBar)
+        status.style.width = party[i].hp / party[i].maxhp * 100 + "%"; 
+        progressBar.appendChild(status);
     }
-    skill_panel.innerHTML = "";
+    skill_panel.innerHTML = "Skills:<br>";
     for(i=0;i<party[select_y].skills.length;i++) {
-        skill_panel.innerHTML += skill_arr[party[select_y].skills[i]];
         if (skill_select == i && select_x == 1) {
-            skill_panel.innerHTML += " <<< ";
+            skill_panel.innerHTML += "<span style='color: rgb(197, 173, 137);'>" + skill_arr[party[select_y].skills[i]] + "</span>";
+        } else {
+            skill_panel.innerHTML += skill_arr[party[select_y].skills[i]];
         }
         skill_panel.innerHTML += "<br>";
     }
@@ -353,6 +395,9 @@ document.addEventListener('keydown', function (event) {
                             statek[0] += 50;
                             statek[1] -= 50;
                             updateManagementPanel();
+                            break;
+                        case 1:
+
                     }
                 }
                 break;
@@ -372,9 +417,11 @@ document.addEventListener('keydown', function (event) {
                     ongoing = party[select_y].skills[i];
                     state = 2;
                 }
+                break;
             case 3:
                 state = 0;
                 createManagementPanel();
                 break;
         }   
 }});
+//test();
