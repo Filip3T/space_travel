@@ -6,11 +6,11 @@ var select_x = 0;           // select on x axis
 var select_y = 1;           // select on y axis (it's easier this way)
 
 var panel;
-var day = 1;
+var dayOfJourney = 1;
 
 var bars = ["stan statku", "morale", "paliwo", "racje"];
 var buttons = ["napraw", "kup", "pracuj", "ekwipunek"];
-var statek = [1000, 750, 500, 500]; // stan, morale, paliwo, racje
+var statek = [1000, 750, 500, 500, 100000]; // stan, morale, paliwo, racje, pieniadze
 
 function createManagementPanel() {
     if (panel != null) {
@@ -18,39 +18,26 @@ function createManagementPanel() {
     }    
     panel = document.createElement("div");
     let fade = document.createElement("div");
-    panel.style.left = "0px";
-    panel.style.width = window.innerWidth * 0.4 + "px";
-    panel.style.height = window.innerHeight + "px";
-    panel.style.top = "0px";
-    panel.style.backgroundColor = "rgba(6, 6, 12, 0.5)";
+    panel.id = "management-panel"
+    if (dayOfJourney == 1) {
+        panel.style.backgroundColor = "rgba(6, 6, 12, 0.5)";
+    } else {
+        panel.style.backgroundColor = "rgba(6, 6, 12, 0.7)";
+    }
 
     fade.style.left = window.innerWidth * 0.4 + "px";
-    fade.style.width = window.innerWidth * 0.1 + "px";
-    fade.style.height = window.innerHeight + "px";
-    fade.style.top = "0px";
-    fade.style.background = "linear-gradient(to right, rgba(6, 6, 12, 0.5), transparent)";
-    
+    fade.id = "management-fade";
+
     document.getElementById('main').appendChild(panel);
     document.getElementById('main').appendChild(fade);
 
     let textBox = document.createElement("p");
     textBox.id = "text-cont";
-    textBox.style.fontSize = "30px";
-    textBox.style.paddingLeft = "35px";
-
     panel.appendChild(textBox);
-
     let progressBar = document.createElement("div");
-    progressBar.style.width = "80%";
-    progressBar.style.backgroundColor = "rgba(135, 110, 70, 0.1)";
-    progressBar.style.height = "35px";
-    progressBar.style.borderRadius = "15px";
-
+    progressBar.classList.add("progress-bar");
     let status = document.createElement("div");
-    status.style.background = "rgb(107, 87, 70)";
-    status.style.width = "10%";
-    status.style.height = "100%";
-    status.style.borderRadius = "15px";
+    status.classList.add("progress-bar-status");
 
     for(let i=0;i<4;i++) {
         textBox.innerHTML += bars[i] + ":<br>";
@@ -61,17 +48,29 @@ function createManagementPanel() {
         textBox.innerHTML += "<br>"
     }
 
+    
     textBox.innerHTML += "<p style='text-align: center; width: 88%; font-size: 40px; margin: 0px;'>Dzień:</p>";
 
     
     let day = document.createElement("div");
     day.style.width = "90%";
-    day.style.height = "100px";
-    day.style.fontSize = "70px";
-    day.style.margin = "0px";
-    day.style.left = "7%";
+
+    day.id = "day-cont";
     day.style.background = "linear-gradient(0.25turn, transparent, rgba(135, 110, 70, 0.1), transparent)";
-    day.innerHTML = "<p id='day-transparent'>&emsp;&emsp;&emsp;&emsp;1&emsp;&ensp;2&emsp;&ensp;3</p>";
+    if (dayOfJourney == 5) {
+        day.innerHTML = "<p id='day-transparent'>" + (dayOfJourney - 2) + "&emsp;&ensp;" + (dayOfJourney - 1) + "&emsp;&ensp;" + dayOfJourney + "&emsp;&ensp;" +
+        (dayOfJourney + 1) + "&emsp;&ensp;</p><span>&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;&ensp;7</span>";
+    } else if (dayOfJourney == 6) {
+        day.innerHTML = "<p id='day-transparent'>" + (dayOfJourney - 2) + "&emsp;&ensp;" + (dayOfJourney - 1) + "&emsp;&ensp;" + dayOfJourney +
+        "&emsp;&ensp;</p><span>&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;7</span>";
+    } else if (dayOfJourney == 7) {
+        day.innerHTML = "<p id='day-transparent'>" + (dayOfJourney - 2) + "&emsp;&ensp;" + (dayOfJourney - 1) + "&emsp;&ensp;&emsp;&ensp;</p><span>&emsp;&ensp;&emsp;&ensp;&emsp;7</span>";
+    } else if (dayOfJourney == 1) {
+        day.innerHTML = "<p id='day-transparent'>&emsp;&ensp;&emsp;&ensp;&emsp;1&emsp;&ensp;2&emsp;&ensp;3"; 
+    } else {
+        day.innerHTML = "<p id='day-transparent'>" +(dayOfJourney - 2) + "&emsp;&ensp;" + (dayOfJourney - 1) + "&emsp;&ensp;" + dayOfJourney + "&emsp;&ensp;" +
+        (dayOfJourney + 1) + "&emsp;&ensp;" + (dayOfJourney + 2) + "</p>";
+    }
     textBox.appendChild(day);
 
     let cordsY = [110, 210, 110, 210];
@@ -79,39 +78,35 @@ function createManagementPanel() {
 
     for(j=0;j<4;j++) {
         let button = document.createElement("div");
-        button.style.borderRadius = "30px";
         button.style.marginLeft = cordsX[j] + "px";
         button.style.marginTop = cordsY[j] + "px";
-        button.style.height = "90px";
         button.style.width = window.innerWidth / 12.4 + "px";
-        button.style.fontSize = "25px";
-        button.style.border = "5px solid rgb(107, 87, 70)";
-        button.style.display = "flex";
-        button.style.alignItems = "center"; 
-        button.style.justifyContent = "center"; 
-
+        button.classList.add("management-button")
         button.innerHTML = buttons[j];
         button.id = "button-" + j;
-        textBox.appendChild(button);
-
-        
+        textBox.appendChild(button);    
     } 
 
     let button = document.createElement("div");
-    button.style.borderRadius = "30px";
-    button.style.border = "5px solid rgb(197, 173, 137)";
-    button.style.height = "90px";
     button.style.width = "80%";
-    button.style.display = "flex";
-    button.style.alignItems = "center"; 
-    button.style.justifyContent = "center";
     button.id = "next_day";
+    button.classList.add("management-button");
+    button.style.border = "5px solid rgb(197, 173, 137)";
     button.innerHTML = "Nastepny dzien";
     button.style.top = window.innerHeight * 0.85 + "px";
     button.style.left = window.innerWidth * 0.016 + "px";
 
-    textBox.appendChild(button);
 
+    textBox.appendChild(button);
+    updateManagementPanel();
+
+    let money = document.createElement('div');
+    money.style.left = window.innerWidth - 400 + "px";
+    money.style.top = window.innerHeight - 70 + "px";
+    money.id = "money";
+    money.innerHTML = statek[4] + "$";
+
+    document.getElementById('main').appendChild(money);
 } //createManagementPanel
 createManagementPanel();
 
@@ -221,6 +216,25 @@ function test() {
     boss = [limb1, limb2, limb3, limb4];
 }
 
+function nextDay() {
+    statek[1] -= 40;
+    statek[2] -= 100;
+    statek[3] -= 50;
+    let event = Math.round(Math.random() * 100);
+    if(event > 50 && event <= 60) {
+        panel.innerHTML = "<p style='font-size:40px;'>Okradziono nas!!!<br>Stracilismy troche paliwa i racji zywnosciowych!</p>";
+        state = 3;
+        statek[1] -= 150;
+        statek[2] -= 200;
+        statek[3] -= 100;
+    } else if (event > 60 && event <= 90) {
+        panel.innerHTML = "<p style='font-size:40px;'>Uderzlismy w asteroide!!!<br>Nasz statek jest w oplakanym stanie!!!</p>";
+        statek[0] -= 300;
+        state = 3;
+    }
+    updateManagementPanel();
+}
+
 var ongoing; //stores used skill when chosing target
 var enemy_select = 0; //stores selected enemy
 
@@ -308,26 +322,38 @@ document.addEventListener('keydown', function (event) {
                     let fade = document.getElementById('fade');
                     fade.style.backgroundColor = "black";
     
-                    day += 1;
-                    fade.innerHTML = "DZIEŃ " + day;
+                    dayOfJourney+=1;
+                    fade.innerHTML = "DZIEŃ " + dayOfJourney;
 
                     setTimeout(() => {
                         fade.style.backgroundColor = "transparent";
-                        let cday = this.getElementById('day-transparent');
-                        if (day == 5) {
-                            cday.innerHTML = (day - 2) + "&emsp;&ensp;" + (day - 1) + "&emsp;&ensp;" + day + "&emsp;&ensp;" +
-                            (day + 1) + "&emsp;&ensp;<span style='color: red;'>7</span>";
-                        } else if (day == 6) {
-                            cday.innerHTML = (day - 2) + "&emsp;&ensp;" + (day - 1) + "&emsp;&ensp;" + day + "&emsp;&ensp;<span style='color: red;'>7</span>&emsp;&ensp;";
-                        } else {
-                            cday.innerHTML = (day - 2) + "&emsp;&ensp;" + (day - 1) + "&emsp;&ensp;" + day + "&emsp;&ensp;" +
-                            (day + 1) + "&emsp;&ensp;" + (day + 2);
-                        }
+                        nextDay();
+                        if (state == 0) {
+                            let cday = this.getElementById('day-cont');
+                            if (dayOfJourney == 5) {
+                                cday.innerHTML = "<p id='day-transparent'>" + (dayOfJourney - 2) + "&emsp;&ensp;" + (dayOfJourney - 1) + "&emsp;&ensp;" + dayOfJourney + "&emsp;&ensp;" +
+                                (dayOfJourney + 1) + "&emsp;&ensp;</p><span>&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;&ensp;7</span>";
+                            } else if (dayOfJourney == 6) {
+                                cday.innerHTML = "<p id='day-transparent'>" + (dayOfJourney - 2) + "&emsp;&ensp;" + (dayOfJourney - 1) + "&emsp;&ensp;" + dayOfJourney +
+                                "&emsp;&ensp;</p><span>&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;7</span>";
+                            } else if (dayOfJourney == 7) {
+                                cday.innerHTML = "<p id='day-transparent'>" + (dayOfJourney - 2) + "&emsp;&ensp;" + (dayOfJourney - 1) + "&emsp;&ensp;&emsp;&ensp;</p><span>&emsp;&ensp;&emsp;&ensp;&emsp;7</span>";
+                            } else {
+                                cday.innerHTML = "<p id='day-transparent'>" +(dayOfJourney - 2) + "&emsp;&ensp;" + (dayOfJourney - 1) + "&emsp;&ensp;" + dayOfJourney + "&emsp;&ensp;" +
+                                (dayOfJourney + 1) + "&emsp;&ensp;" + (dayOfJourney + 2) + "</p>";
+                            }
+                        }   
                     }, 2000);
                     setTimeout(() => {
                         fade.innerHTML = "";
                     }, 3000);
-
+                } else {
+                    switch(select_x) {
+                        case 0:
+                            statek[0] += 50;
+                            statek[1] -= 50;
+                            updateManagementPanel();
+                    }
                 }
                 break;
             case 2:     //space in enemy selection
@@ -346,5 +372,9 @@ document.addEventListener('keydown', function (event) {
                     ongoing = party[select_y].skills[i];
                     state = 2;
                 }
+            case 3:
+                state = 0;
+                createManagementPanel();
+                break;
         }   
 }});

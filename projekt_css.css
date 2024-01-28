@@ -1,0 +1,63 @@
+div {position: absolute;}
+#day-transparent {
+    background: linear-gradient(0.25turn, transparent, rgba(107, 87, 70, 0.8), transparent);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-top: 0px;
+    white-space: nowrap;
+    position: absolute;
+    left: 0px;
+}
+span {
+    color: rgb(107, 32, 22);
+}
+#management-panel {
+    left: 0px;
+    width: 40vw;
+    height: 100vw;
+    top: 0px;
+}
+#management-fade {
+    width: 10vw;
+    height: 100vw;
+    top: 0px;
+    background: linear-gradient(to right, rgba(6, 6, 12, 0.5), transparent);
+}
+#text-cont {
+    font-size: 30px;
+    padding-left: 35px;
+}
+.progress-bar {
+    width: 80%;
+    background-color: rgba(135, 110, 70, 0.1);
+    height: 35px;
+    border-radius: 15px;
+}
+.progress-bar-status {
+    background: rgb(107, 87, 70);
+    width: 10vw;
+    height: 35px;
+    border-radius: 15px;
+}
+#day-cont {
+    height: 100px;
+    font-size: 70px;
+    margin: 0px;
+    left: 7%;
+}
+.management-button {
+    border-radius: 30px;
+    height: 90px;
+    font-size: 25px;
+    border: 5px solid rgb(107, 87, 70);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#money {
+    height: 70px;
+    width: 370px;
+    font-size: 40px;
+    text-align: right;
+}
