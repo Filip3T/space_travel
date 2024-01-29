@@ -1,7 +1,7 @@
 //creating a party
 
 var party = [];             // array of party members
-var state = 0;              // 0 - management    1 - combat_skill_select    2 - combat_enemy_select    3 - story    4 - store
+var state = 1;              // 0 - management    1 - combat_skill_select    2 - combat_enemy_select    3 - story    5 - store
 var select_x = 0;           // select on x axis
 var select_y = 1;           // select on y axis (it's easier this way)
 
@@ -9,22 +9,18 @@ var panel;
 var dayOfJourney = 1;
 
 var bars = ["stan statku", "morale", "paliwo", "racje"];
-var buttons = ["napraw", "kup", "pracuj", "ekwipunek"];
-var statek = [1000, 750, 500, 500, 1000]; // stan, morale, paliwo, racje, pieniadze
+var buttons = ["napraw", "kup", "pracuj", "wolne"];
+var statek = [1000, 750, 500, 500, 100]; // stan, morale, paliwo, racje, pieniadze
 
 function createManagementPanel() {
     if (panel != null) {
-        panel.remove();
-    }    
+        panel.innerHTML = "";
+    }
+    main.innerHTML = "";
     panel = document.createElement("div");
     let fade = document.createElement("div");
     panel.id = "management-panel"
-    if (dayOfJourney == 1) {
-        panel.style.backgroundColor = "rgba(6, 6, 12, 0.5)";
-    } else {
-        panel.style.backgroundColor = "rgba(6, 6, 12, 0.7)";
-    }
-
+    panel.style.backgroundColor = "rgba(6, 6, 12, 0.5)";
     fade.style.left = window.innerWidth * 0.4 + "px";
     fade.id = "management-fade";
 
@@ -98,8 +94,7 @@ function createManagementPanel() {
 
 
     textBox.appendChild(button);
-    updateManagementPanel();
-
+    
     let money = document.createElement('div');
     money.style.left = window.innerWidth - 400 + "px";
     money.style.top = window.innerHeight - 70 + "px";
@@ -107,30 +102,31 @@ function createManagementPanel() {
     money.innerHTML = statek[4] + "$";
 
     document.getElementById('main').appendChild(money);
+    updateManagementPanel();
 } //createManagementPanel
-createManagementPanel();
+//createManagementPanel();
 
 function updateManagementPanel() {
     if(statek[0] <= 0) {
         panel.innerHTML = "STATEK ZOSTAL ZNISZCZONY!!! KONIEC!!!";
         state = 4;
-    } else if (statek[1] <= 0) {
+    } if (statek[1] <= 0) {
         panel.innerHTML = "CALA ZALOGA CIE OPUSZCZA!!! KONIEC!!!";
         state = 4;
-    } else if (statek[2] <= 0) {
+    } if (statek[2] <= 0) {
         panel.innerHTML = "SKONCZLYLO SIE PALIWO!!! KONIEC!!!";
         state = 4;
-    } else if (statek[3] <= 0) {
+    } if (statek[3] <= 0) {
         panel.innerHTML = "SKONCZYLY SIE RACJE!!! KONIEC!!!";
         state = 4;
     }
     if(statek[0] >= 1000) {
         statek[0] = 1000;
-    } else if (statek[1] > 1000) {
+    } if (statek[1] > 1000) {
         statek[1] = 1000;
-    } else if (statek[2] > 1000) {
+    } if (statek[2] > 1000) {
         statek[2] = 1000;
-    } else if (statek[3] > 1000) {
+    } if (statek[3] > 1000) {
         statek[3] = 1000;
     }
     if (state == 0) {
@@ -138,9 +134,29 @@ function updateManagementPanel() {
             let focus = document.getElementById(bars[i] + '-status');
             focus.style.width = statek[i] / 10 + "%";
         }
-    }
+    } 
+    document.getElementById('money').innerHTML = statek[4] + "$";
 } //updateManagementPanel
-updateManagementPanel();
+//updateManagementPanel();
+
+function createStoreMenu() {
+    panel.innerHTML = "";
+    let heights = [0,0.2,0.4,0.7];
+    let nazwy = ["paliwo 10% - 100$", "racje 10% - 200$", "najemnicy - menu", "wstecz"];
+    for(i=0;i<4;i++) {
+        let button = document.createElement("div");
+        button.classList.add("management-button");
+        button.style.width = "30vw";
+        button.style.margin = "4vw";
+        button.style.top = heights[i] * window.innerHeight + "px";
+        button.innerHTML = nazwy[i];
+        if (select_y == i) {
+            button.style.border = "5px solid rgb(197, 173, 137)";
+        }
+        panel.appendChild(button);
+        state = 5;
+    }
+}
 
 function ally(name, hp, skills) {
     this.name = name;
@@ -192,7 +208,7 @@ function createCombatPanel() {    //creating a panel for combat choices
     skill_panel.style.left = window.innerWidth * 0.2 + "px";
     panel.appendChild(skill_panel);
 } //createConbatPanel
-//createCombatPanel();
+createCombatPanel();
 
 var skill_select = 0;
 
@@ -227,7 +243,7 @@ function partyUpdate() {    //updating party members
         skill_panel.innerHTML += "<br>";
     }
 } //partyUpdate
-//partyUpdate();
+partyUpdate();
 
 function limb(name, hp, id, x, y) {
     this.name = name;
@@ -259,22 +275,52 @@ function test() {
 }
 
 function nextDay() {
-    statek[1] -= 40;
-    statek[2] -= 100;
-    statek[3] -= 50;
-    let event = Math.round(Math.random() * 100);
-    if(event > 50 && event <= 60) {
-        panel.innerHTML = "<p style='font-size:40px;'>Okradziono nas!!!<br>Stracilismy troche paliwa i racji zywnosciowych!</p>";
-        state = 3;
-        statek[1] -= 150;
+    let fade = document.getElementById('fade');
+    fade.style.backgroundColor = "black";
+
+    dayOfJourney+=1;
+    fade.innerHTML = "DZIEŃ " + dayOfJourney;
+
+    setTimeout(() => {
+        fade.style.backgroundColor = "transparent";
+        statek[1] -= 80;
         statek[2] -= 200;
-        statek[3] -= 100;
-    } else if (event > 60 && event <= 90) {
-        panel.innerHTML = "<p style='font-size:40px;'>Uderzlismy w asteroide!!!<br>Nasz statek jest w oplakanym stanie!!!</p>";
-        statek[0] -= 300;
-        state = 3;
-    }
-    updateManagementPanel();
+        statek[3] -= 150;
+        let event = Math.round(Math.random() * 100);
+        if(event > 50 && event <= 60) {
+            panel.innerHTML = "<p style='font-size:40px;'>Okradziono nas!!!<br>Stracilismy troche paliwa i racji zywnosciowych!</p>";
+            state = 3;
+            statek[1] -= 150;
+            statek[2] -= 200;
+            statek[3] -= 100;
+        } else if (event > 60 && event <= 90) {
+            panel.innerHTML = "<p style='font-size:40px;'>Uderzlismy w asteroide!!!<br>Nasz statek jest w oplakanym stanie!!!</p>";
+            statek[0] -= 300;
+            state = 3;
+        }
+        if (state != 3) {
+            updateManagementPanel();
+        }
+        if (state == 0) {
+            let cday = this.getElementById('day-cont');
+            if (dayOfJourney == 5) {
+                cday.innerHTML = "<p id='day-transparent'>" + (dayOfJourney - 2) + "&emsp;&ensp;" + (dayOfJourney - 1) + "&emsp;&ensp;" + dayOfJourney + "&emsp;&ensp;" +
+                (dayOfJourney + 1) + "&emsp;&ensp;</p><span>&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;&ensp;7</span>";
+            } else if (dayOfJourney == 6) {
+                cday.innerHTML = "<p id='day-transparent'>" + (dayOfJourney - 2) + "&emsp;&ensp;" + (dayOfJourney - 1) + "&emsp;&ensp;" + dayOfJourney +
+                "&emsp;&ensp;</p><span>&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;7</span>";
+            } else if (dayOfJourney == 7) {
+                cday.innerHTML = "<p id='day-transparent'>" + (dayOfJourney - 2) + "&emsp;&ensp;" + (dayOfJourney - 1) + "&emsp;&ensp;&emsp;&ensp;</p><span>&emsp;&ensp;&emsp;&ensp;&emsp;7</span>";
+            } else {
+                cday.innerHTML = "<p id='day-transparent'>" +(dayOfJourney - 2) + "&emsp;&ensp;" + (dayOfJourney - 1) + "&emsp;&ensp;" + dayOfJourney + "&emsp;&ensp;" +
+                (dayOfJourney + 1) + "&emsp;&ensp;" + (dayOfJourney + 2) + "</p>";
+            }
+        }   
+    }, 2000);
+    setTimeout(() => {
+        fade.innerHTML = "";
+    }, 3000);
+    
 }
 
 var ongoing; //stores used skill when chosing target
@@ -317,6 +363,13 @@ document.addEventListener('keydown', function (event) {
                     skill_select += 1;
                 }
                 partyUpdate();
+                break;
+            case 5:
+                if (select_y != 3) {
+                    select_y += 1;
+                    createStoreMenu();
+                    console.log(select_y);
+                }
         }
 
     } else if (event.keyCode == 37) { // Left
@@ -355,49 +408,38 @@ document.addEventListener('keydown', function (event) {
                     select_y -= 1;
                 } else if (skill_select != 0 && state == 1) skill_select -= 1;
                 partyUpdate();
+                break;
+            case 5:
+                if (select_y != 0) {
+                    select_y -= 1
+                    createStoreMenu();
+                }
         }
         
     } else if (event.keyCode == 32) { //Space
         switch(state) {
             case 0:     //space in management menu
                 if (select_y == 1) {
-                    let fade = document.getElementById('fade');
-                    fade.style.backgroundColor = "black";
-    
-                    dayOfJourney+=1;
-                    fade.innerHTML = "DZIEŃ " + dayOfJourney;
-
-                    setTimeout(() => {
-                        fade.style.backgroundColor = "transparent";
-                        nextDay();
-                        if (state == 0) {
-                            let cday = this.getElementById('day-cont');
-                            if (dayOfJourney == 5) {
-                                cday.innerHTML = "<p id='day-transparent'>" + (dayOfJourney - 2) + "&emsp;&ensp;" + (dayOfJourney - 1) + "&emsp;&ensp;" + dayOfJourney + "&emsp;&ensp;" +
-                                (dayOfJourney + 1) + "&emsp;&ensp;</p><span>&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;&ensp;7</span>";
-                            } else if (dayOfJourney == 6) {
-                                cday.innerHTML = "<p id='day-transparent'>" + (dayOfJourney - 2) + "&emsp;&ensp;" + (dayOfJourney - 1) + "&emsp;&ensp;" + dayOfJourney +
-                                "&emsp;&ensp;</p><span>&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;7</span>";
-                            } else if (dayOfJourney == 7) {
-                                cday.innerHTML = "<p id='day-transparent'>" + (dayOfJourney - 2) + "&emsp;&ensp;" + (dayOfJourney - 1) + "&emsp;&ensp;&emsp;&ensp;</p><span>&emsp;&ensp;&emsp;&ensp;&emsp;7</span>";
-                            } else {
-                                cday.innerHTML = "<p id='day-transparent'>" +(dayOfJourney - 2) + "&emsp;&ensp;" + (dayOfJourney - 1) + "&emsp;&ensp;" + dayOfJourney + "&emsp;&ensp;" +
-                                (dayOfJourney + 1) + "&emsp;&ensp;" + (dayOfJourney + 2) + "</p>";
-                            }
-                        }   
-                    }, 2000);
-                    setTimeout(() => {
-                        fade.innerHTML = "";
-                    }, 3000);
+                    nextDay();
+                    statek[4] += 250;
                 } else {
                     switch(select_x) {
                         case 0:
-                            statek[0] += 50;
-                            statek[1] -= 50;
+                            statek[0] += 70;
+                            statek[1] -= 20;
                             updateManagementPanel();
                             break;
                         case 1:
-
+                            createStoreMenu();
+                            break;
+                        case 2:
+                            statek[4] += 250;
+                            statek[1] -= 100;
+                            updateManagementPanel();
+                            break;
+                        case 3:
+                            statek[1] += 280;
+                            nextDay();
                     }
                 }
                 break;
@@ -421,7 +463,29 @@ document.addEventListener('keydown', function (event) {
             case 3:
                 state = 0;
                 createManagementPanel();
+                updateManagementPanel();
                 break;
+            case 5:
+                switch (select_y) {
+                    case 0:
+                        if (statek[4] >= 100) {
+                            statek[4] -= 100;
+                            statek[2] += 100;
+                        }
+                        break;
+                    case 1:
+                        if (statek[4] >= 200) {
+                            statek[4] -= 200;
+                            statek[3] += 200;
+                        }
+                        break;
+                    case 3:
+                        state = 0;
+                        createManagementPanel();
+                        select_y = 1;
+                        break;
+                }
+                document.getElementById("money").innerHTML = statek[4] + "$";
         }   
 }});
-//test();
+test();
