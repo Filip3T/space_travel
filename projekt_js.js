@@ -10,7 +10,7 @@ var dayOfJourney = 1;
 
 var bars = ["stan statku", "morale", "paliwo", "racje"];
 var buttons = ["napraw", "kup", "pracuj", "wolne"];
-var statek = [1000, 750, 500, 500, 100]; // stan, morale, paliwo, racje, pieniadze
+var ship = [1000,750,500,500,100];
 
 function createManagementPanel() {
     if (panel != null) {
@@ -43,32 +43,32 @@ function createManagementPanel() {
         progressBar.appendChild(status);
         textBox.innerHTML += "<br>"
     }
-
     
     textBox.innerHTML += "<p style='text-align: center; width: 88%; font-size: 40px; margin: 0px;'>Dzień:</p>";
 
-    
     let day = document.createElement("div");
     day.style.width = "90%";
 
     day.id = "day-cont";
     day.style.background = "linear-gradient(0.25turn, transparent, rgba(135, 110, 70, 0.1), transparent)";
-    if (dayOfJourney == 5) {
-        day.innerHTML = "<p id='day-transparent'>" + (dayOfJourney - 2) + "&emsp;&ensp;" + (dayOfJourney - 1) + "&emsp;&ensp;" + dayOfJourney + "&emsp;&ensp;" +
-        (dayOfJourney + 1) + "&emsp;&ensp;</p><span>&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;&ensp;7</span>";
-    } else if (dayOfJourney == 6) {
-        day.innerHTML = "<p id='day-transparent'>" + (dayOfJourney - 2) + "&emsp;&ensp;" + (dayOfJourney - 1) + "&emsp;&ensp;" + dayOfJourney +
-        "&emsp;&ensp;</p><span>&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;7</span>";
-    } else if (dayOfJourney == 7) {
-        day.innerHTML = "<p id='day-transparent'>" + (dayOfJourney - 2) + "&emsp;&ensp;" + (dayOfJourney - 1) + "&emsp;&ensp;&emsp;&ensp;</p><span>&emsp;&ensp;&emsp;&ensp;&emsp;7</span>";
-    } else if (dayOfJourney == 1) {
-        day.innerHTML = "<p id='day-transparent'>&emsp;&ensp;&emsp;&ensp;&emsp;1&emsp;&ensp;2&emsp;&ensp;3"; 
-    } else {
-        day.innerHTML = "<p id='day-transparent'>" +(dayOfJourney - 2) + "&emsp;&ensp;" + (dayOfJourney - 1) + "&emsp;&ensp;" + dayOfJourney + "&emsp;&ensp;" +
-        (dayOfJourney + 1) + "&emsp;&ensp;" + (dayOfJourney + 2) + "</p>";
-    }
+    let grad = [0.2, 0.5, 1, 0.5, 0.2];
     textBox.appendChild(day);
-
+    for (i=0;i<5;i++) {
+        let day_tile = document.createElement("div");
+        day_tile.style.color = "rgba(107, 87, 70," + grad[i] + ")";
+        day_tile.style.left = 20 * i + 1 + "%";
+        day_tile.id = "tile-" + i;
+        day.appendChild(day_tile);
+        if (dayOfJourney + i - 2 > 0 && dayOfJourney + i - 2 < 7) {
+            day_tile.innerHTML = dayOfJourney + (i - 2);
+        } else if (dayOfJourney + i - 2 == 7) {
+            day_tile.style.color ="rgba(222, 68, 51," + grad[i] + ")";
+            day_tile.innerHTML = dayOfJourney + (i - 2);
+        } else {
+            day_tile.innerHTML = "";
+        }
+        day.appendChild(day_tile);
+    }
     let cordsY = [110, 210, 110, 210];
     let cordsX = [0, window.innerWidth / 12.4, 2 * window.innerWidth / 12.4, 3 * window.innerWidth / 12.4];
 
@@ -99,7 +99,7 @@ function createManagementPanel() {
     money.style.left = window.innerWidth - 400 + "px";
     money.style.top = window.innerHeight - 70 + "px";
     money.id = "money";
-    money.innerHTML = statek[4] + "$";
+    money.innerHTML = ship[4] + "$";
 
     document.getElementById('main').appendChild(money);
     updateManagementPanel();
@@ -107,35 +107,35 @@ function createManagementPanel() {
 //createManagementPanel();
 
 function updateManagementPanel() {
-    if(statek[0] <= 0) {
+ /*    if(ship[0] <= 0) {
         panel.innerHTML = "STATEK ZOSTAL ZNISZCZONY!!! KONIEC!!!";
         state = 4;
-    } if (statek[1] <= 0) {
+    } if (ship[1] <= 0) {
         panel.innerHTML = "CALA ZALOGA CIE OPUSZCZA!!! KONIEC!!!";
         state = 4;
-    } if (statek[2] <= 0) {
+    } if (ship[2] <= 0) {
         panel.innerHTML = "SKONCZLYLO SIE PALIWO!!! KONIEC!!!";
         state = 4;
-    } if (statek[3] <= 0) {
+    } if (ship[3] <= 0) {
         panel.innerHTML = "SKONCZYLY SIE RACJE!!! KONIEC!!!";
         state = 4;
-    }
-    if(statek[0] >= 1000) {
-        statek[0] = 1000;
-    } if (statek[1] > 1000) {
-        statek[1] = 1000;
-    } if (statek[2] > 1000) {
-        statek[2] = 1000;
-    } if (statek[3] > 1000) {
-        statek[3] = 1000;
+    } */
+    if(ship[0] >= 1000) {
+        ship[0] = 1000;
+    } if (ship[1] > 1000) {
+        ship[1] = 1000;
+    } if (ship[2] > 1000) {
+        ship[2] = 1000;
+    } if (ship[3] > 1000) {
+        ship[3] = 1000;
     }
     if (state == 0) {
         for (i=0;i<4;i++) {
             let focus = document.getElementById(bars[i] + '-status');
-            focus.style.width = statek[i] / 10 + "%";
+            focus.style.width = ship[i] / 10 + "%";
         }
     } 
-    document.getElementById('money').innerHTML = statek[4] + "$";
+    document.getElementById('money').innerHTML = ship[4] + "$";
 } //updateManagementPanel
 //updateManagementPanel();
 
@@ -158,18 +158,28 @@ function createStoreMenu() {
     }
 }
 
-function ally(name, hp, skills) {
+function ally(name, hp, skills, mp) {
     this.name = name;
     this.hp = hp;
     this.maxhp = hp;
     this.skills = skills;
+    this.mp = mp;
+    this.maxmp = mp;
     party.push(this);    
 } //creating an ally
 
-var skill_arr = ["attack", "heal", "slam"];
+function skill(name, type, effect, price) {
+    this.name = name;
+    this.type = type; //dmg - atak  hel - zdrowie   def - tarcza    amp - dmg boost
+    this.effect = effect;
+    this.price = price;
+}
 
-var mc = new ally("player", 100, [0,1,2]);
-var test_ally = new ally("test", 100, [0,2]);
+var skill_arr = [new skill("cios", "dmg", 50, 3).name, new skill("orzeźwienie", "hel", 20, 6).name, new skill("tarcza", "def", 20, 3).name,
+new skill("ciemna magia", "dmg", 180, 9).name, new skill("modlitwa", "amp", 100, 12).name];
+
+var mc = new ally("player", 100, [0,1,2], 100);
+var test_ally = new ally("test", 100, [0,2], 999);
 
 var party_panel;
 var skill_panel;
@@ -224,9 +234,10 @@ function partyUpdate() {    //updating party members
     for(i=0;i<party.length;i++) {
         
         if (select_y == i && select_x == 0) {
-            party_panel.innerHTML += "<span style='color: rgb(197, 173, 137);'>" + party[i].name + "</span>";
+            party_panel.innerHTML += "<span style='color: rgb(197, 173, 137);'>" + party[i].name + "</span><span style='float: right;'>" +
+            party[i].mp + "</span>";
         } else {
-            party_panel.innerHTML += party[i].name;
+            party_panel.innerHTML += party[i].name + "<span style='float: right;'>" + party[i].mp + "</span>";
         }
         party_panel.innerHTML += "<br>";
         party_panel.appendChild(progressBar)
@@ -245,10 +256,9 @@ function partyUpdate() {    //updating party members
 } //partyUpdate
 partyUpdate();
 
-function limb(name, hp, id, x, y) {
+function limb(name, hp, x, y) {
     this.name = name;
     this.hp = hp;
-    this.id = id;
     this.maxhp = hp;
 
     var graphic = document.createElement("div");
@@ -267,10 +277,10 @@ function limb(name, hp, id, x, y) {
 var boss;
 
 function test() {
-    let limb1 = new limb("lewa reka", 100, 1, 100, 400);
-    let limb2 = new limb("prawa reka", 100, 2, 400, 400);
-    let limb3 = new limb("lewa noga", 100, 3, 700, 400);
-    let limb4 = new limb("prawa noga", 100, 4, 1000, 400);
+    let limb1 = new limb("lewa reka", 100, 100, 400);
+    let limb2 = new limb("prawa reka", 100, 400, 400);
+    let limb3 = new limb("lewa noga", 100, 700, 400);
+    let limb4 = new limb("prawa noga", 100, 1000, 400);
     boss = [limb1, limb2, limb3, limb4];
 }
 
@@ -283,44 +293,45 @@ function nextDay() {
 
     setTimeout(() => {
         fade.style.backgroundColor = "transparent";
-        statek[1] -= 80;
-        statek[2] -= 200;
-        statek[3] -= 150;
+        ship[1] -= 80;
+        ship[2] -= 200;
+        ship[3] -= 150;
         let event = Math.round(Math.random() * 100);
         if(event > 50 && event <= 60) {
             panel.innerHTML = "<p style='font-size:40px;'>Okradziono nas!!!<br>Stracilismy troche paliwa i racji zywnosciowych!</p>";
             state = 3;
-            statek[1] -= 150;
-            statek[2] -= 200;
-            statek[3] -= 100;
-        } else if (event > 60 && event <= 90) {
+            ship[1] -= 150;
+            ship[2] -= 200;
+            ship[3] -= 100;
+        } else if (event > 60 && event <= 70) {
             panel.innerHTML = "<p style='font-size:40px;'>Uderzlismy w asteroide!!!<br>Nasz statek jest w oplakanym stanie!!!</p>";
-            statek[0] -= 300;
+            ship[0] -= 300;
             state = 3;
         }
         if (state != 3) {
             updateManagementPanel();
         }
         if (state == 0) {
-            let cday = this.getElementById('day-cont');
-            if (dayOfJourney == 5) {
-                cday.innerHTML = "<p id='day-transparent'>" + (dayOfJourney - 2) + "&emsp;&ensp;" + (dayOfJourney - 1) + "&emsp;&ensp;" + dayOfJourney + "&emsp;&ensp;" +
-                (dayOfJourney + 1) + "&emsp;&ensp;</p><span>&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;&ensp;7</span>";
-            } else if (dayOfJourney == 6) {
-                cday.innerHTML = "<p id='day-transparent'>" + (dayOfJourney - 2) + "&emsp;&ensp;" + (dayOfJourney - 1) + "&emsp;&ensp;" + dayOfJourney +
-                "&emsp;&ensp;</p><span>&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;&emsp;&ensp;7</span>";
-            } else if (dayOfJourney == 7) {
-                cday.innerHTML = "<p id='day-transparent'>" + (dayOfJourney - 2) + "&emsp;&ensp;" + (dayOfJourney - 1) + "&emsp;&ensp;&emsp;&ensp;</p><span>&emsp;&ensp;&emsp;&ensp;&emsp;7</span>";
-            } else {
-                cday.innerHTML = "<p id='day-transparent'>" +(dayOfJourney - 2) + "&emsp;&ensp;" + (dayOfJourney - 1) + "&emsp;&ensp;" + dayOfJourney + "&emsp;&ensp;" +
-                (dayOfJourney + 1) + "&emsp;&ensp;" + (dayOfJourney + 2) + "</p>";
+            for (i=0;i<5;i++) {
+                let grad = [0.2, 0.5, 1, 0.5, 0.2];
+                let day_cont = document.getElementById("tile-" + i)
+                day_cont.style.color = "rgba(107, 87, 70," + grad[i] + ")";
+                day_cont.style.left = 20 * i + 1 + "%";
+                day_cont.id = "tile-" + i;
+                if (dayOfJourney + i - 2 > 0 && dayOfJourney + i - 2 < 7) {
+                    day_cont.innerHTML = dayOfJourney + (i - 2);
+                } else if (dayOfJourney + i - 2 == 7) {
+                    day_cont.style.color ="rgba(222, 68, 51," + grad[i] + ")";
+                    day_cont.innerHTML = dayOfJourney + (i - 2);
+                } else {
+                    day_cont.innerHTML = "";
+                }
             }
         }   
     }, 2000);
     setTimeout(() => {
         fade.innerHTML = "";
     }, 3000);
-    
 }
 
 var ongoing; //stores used skill when chosing target
@@ -421,24 +432,24 @@ document.addEventListener('keydown', function (event) {
             case 0:     //space in management menu
                 if (select_y == 1) {
                     nextDay();
-                    statek[4] += 250;
+                    ship[4] += 400;
                 } else {
                     switch(select_x) {
                         case 0:
-                            statek[0] += 70;
-                            statek[1] -= 20;
+                            ship[0] += 70;
+                            ship[1] -= 20;
                             updateManagementPanel();
                             break;
                         case 1:
                             createStoreMenu();
                             break;
                         case 2:
-                            statek[4] += 250;
-                            statek[1] -= 100;
+                            ship[4] += 250;
+                            ship[1] -= 100;
                             updateManagementPanel();
                             break;
                         case 3:
-                            statek[1] += 280;
+                            ship[1] += 280;
                             nextDay();
                     }
                 }
@@ -468,15 +479,15 @@ document.addEventListener('keydown', function (event) {
             case 5:
                 switch (select_y) {
                     case 0:
-                        if (statek[4] >= 100) {
-                            statek[4] -= 100;
-                            statek[2] += 100;
+                        if (ship[4] >= 100) {
+                            ship[4] -= 100;
+                            ship[2] += 100;
                         }
                         break;
                     case 1:
-                        if (statek[4] >= 200) {
-                            statek[4] -= 200;
-                            statek[3] += 200;
+                        if (ship[4] >= 200) {
+                            ship[4] -= 200;
+                            ship[3] += 200;
                         }
                         break;
                     case 3:
@@ -485,7 +496,7 @@ document.addEventListener('keydown', function (event) {
                         select_y = 1;
                         break;
                 }
-                document.getElementById("money").innerHTML = statek[4] + "$";
+                document.getElementById("money").innerHTML = ship[4] + "$";
         }   
 }});
 test();
