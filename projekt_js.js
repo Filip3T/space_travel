@@ -84,13 +84,18 @@ function createManagementPanel() {
     } 
 
     let button = document.createElement("div");
-    button.style.width = "80%";
+    button.style.width =  window.innerWidth * 0.32 + "px";
     button.id = "next_day";
     button.classList.add("management-button");
     button.style.border = "5px solid rgb(197, 173, 137)";
-    button.innerHTML = "Nastepny dzien";
+    if (dayOfJourney != 7) {
+        button.innerHTML = "Nastepny dzien";
+    } else {
+        button.innerHTML = "Zaśnij";
+    }
+    console.log(dayOfJourney);
     button.style.top = window.innerHeight * 0.85 + "px";
-    button.style.left = window.innerWidth * 0.028 + "px";
+    button.style.marginLeft = "0px";
 
 
     textBox.appendChild(button);
@@ -175,8 +180,8 @@ function skill(name, type, effect, price) {
     this.price = price;
 }
 
-var skill_arr = [new skill("cios", "dmg", 50, 3).name, new skill("orzeźwienie", "hel", 20, 6).name, new skill("tarcza", "def", 20, 3).name,
-new skill("ciemna magia", "dmg", 180, 9).name, new skill("modlitwa", "amp", 100, 12).name];
+var skill_arr = [new skill("cios", "dmg", 50, 3), new skill("orzeźwienie", "hel", 20, 6), new skill("tarcza", "def", 20, 3),
+new skill("ciemna magia", "dmg", 180, 9), new skill("modlitwa", "amp", 100, 12)];
 
 var mc = new ally("player", 100, [0,1,2], 100);
 var test_ally = new ally("test", 100, [0,2], 999);
@@ -247,9 +252,9 @@ function partyUpdate() {    //updating party members
     skill_panel.innerHTML = "Skills:<br>";
     for(i=0;i<party[select_y].skills.length;i++) {
         if (skill_select == i && select_x == 1) {
-            skill_panel.innerHTML += "<span style='color: rgb(197, 173, 137);'>" + skill_arr[party[select_y].skills[i]] + "</span>";
+            skill_panel.innerHTML += "<span style='color: rgb(197, 173, 137);'>" + skill_arr[party[select_y].skills[i]].name + "</span>";
         } else {
-            skill_panel.innerHTML += skill_arr[party[select_y].skills[i]];
+            skill_panel.innerHTML += skill_arr[party[select_y].skills[i]].name;
         }
         skill_panel.innerHTML += "<br>";
     }
@@ -328,6 +333,9 @@ function nextDay() {
                 }
             }
         }   
+        if (dayOfJourney == 7) {
+            document.getElementById("next_day").innerHTML = "Zaśnij";
+        }
     }, 2000);
     setTimeout(() => {
         fade.innerHTML = "";
@@ -466,9 +474,24 @@ document.addEventListener('keydown', function (event) {
                 break;
             case 1:
                 if (select_x == 1) {        //space in combat menu
-                    boss[enemy_select].div.style.border = "3px solid black";
-                    ongoing = party[select_y].skills[i];
-                    state = 2;
+                    console.log(party[select_y].skills[skill_select].name);
+                    switch(party[select_y].skills[skill_select].type) {
+                        case "dmg":
+                            boss[enemy_select].div.style.border = "3px solid black";
+                            ongoing = party[select_y].skills[i];
+                            state = 2;
+                            break;
+                        case "hel":
+                            console.log("hel");
+                            break;
+                        case "amp":
+                            console.log("amp");
+                            break;
+                        case "def":
+                            console.log("def");
+                            break;
+                    }
+
                 }
                 break;
             case 3:
