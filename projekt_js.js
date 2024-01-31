@@ -44,10 +44,9 @@ function createManagementPanel() {
         textBox.innerHTML += "<br>"
     }
     
-    textBox.innerHTML += "<p style='text-align: center; width: 88%; font-size: 40px; margin: 0px;'>Dzień:</p>";
+    textBox.innerHTML += "<p style='text-align: center; width: 88%; font-size:" + window.innerHeight*0.037+ "px; margin: 0px;'>Dzień:</p>";
 
     let day = document.createElement("div");
-    day.style.width = "90%";
 
     day.id = "day-cont";
     day.style.background = "linear-gradient(0.25turn, transparent, rgba(135, 110, 70, 0.1), transparent)";
@@ -56,8 +55,9 @@ function createManagementPanel() {
     for (i=0;i<5;i++) {
         let day_tile = document.createElement("div");
         day_tile.style.color = "rgba(107, 87, 70," + grad[i] + ")";
-        day_tile.style.left = 20 * i + 1 + "%";
+        day_tile.style.left = 20 * i + "%";
         day_tile.id = "tile-" + i;
+        day_tile.style.marginTop = window.innerHeight * 0.002;
         day.appendChild(day_tile);
         if (dayOfJourney + i - 2 > 0 && dayOfJourney + i - 2 < 7) {
             day_tile.innerHTML = dayOfJourney + (i - 2);
@@ -69,13 +69,13 @@ function createManagementPanel() {
         }
         day.appendChild(day_tile);
     }
-    let cordsY = [110, 210, 110, 210];
+    let cordsY = [11, 20, 11, 20];
     let cordsX = [0, window.innerWidth / 12.4, 2 * window.innerWidth / 12.4, 3 * window.innerWidth / 12.4];
 
     for(j=0;j<4;j++) {
         let button = document.createElement("div");
         button.style.marginLeft = cordsX[j] + "px";
-        button.style.marginTop = cordsY[j] + "px";
+        button.style.marginTop = cordsY[j] + "vh";
         button.style.width = window.innerWidth / 12.4 + "px";
         button.classList.add("management-button")
         button.innerHTML = buttons[j];
@@ -90,7 +90,7 @@ function createManagementPanel() {
     button.style.border = "5px solid rgb(197, 173, 137)";
     button.innerHTML = "Nastepny dzien";
     button.style.top = window.innerHeight * 0.85 + "px";
-    button.style.left = window.innerWidth * 0.016 + "px";
+    button.style.left = window.innerWidth * 0.028 + "px";
 
 
     textBox.appendChild(button);
@@ -277,10 +277,10 @@ function limb(name, hp, x, y) {
 var boss;
 
 function test() {
-    let limb1 = new limb("lewa reka", 100, 100, 400);
-    let limb2 = new limb("prawa reka", 100, 400, 400);
-    let limb3 = new limb("lewa noga", 100, 700, 400);
-    let limb4 = new limb("prawa noga", 100, 1000, 400);
+    let limb1 = new limb("lewa reka", 100, 100, 100);
+    let limb2 = new limb("prawa reka", 100, 400, 100);
+    let limb3 = new limb("lewa noga", 100, 700, 100);
+    let limb4 = new limb("prawa noga", 100, 1000, 100);
     boss = [limb1, limb2, limb3, limb4];
 }
 
