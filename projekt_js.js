@@ -1,16 +1,17 @@
 //creating a party
 
 var party = [];             // array of party members
-var state = 1;              // 0 - management    1 - combat_skill_select    2 - combat_enemy_select    3 - story    5 - store
+var state = 0;              // 0 - management    1 - combat_skill_select    2 - combat_enemy_select    3 - story    5 - store   6 -
 var select_x = 0;           // select on x axis
 var select_y = 1;           // select on y axis (it's easier this way)
 
 var panel;
 var dayOfJourney = 1;
+var weekOfJouney = 1;
 
 var bars = ["stan statku", "morale", "paliwo", "racje"];
 var buttons = ["napraw", "kup", "pracuj", "wolne"];
-var ship = [1000,750,500,500,100];
+var ship = [1000,750,500,500,2000];
 
 function createManagementPanel() {
     if (panel != null) {
@@ -109,7 +110,7 @@ function createManagementPanel() {
     document.getElementById('main').appendChild(money);
     updateManagementPanel();
 } //createManagementPanel
-//createManagementPanel();
+createManagementPanel();
 
 function updateManagementPanel() {
  /*    if(ship[0] <= 0) {
@@ -142,7 +143,7 @@ function updateManagementPanel() {
     } 
     document.getElementById('money').innerHTML = ship[4] + "$";
 } //updateManagementPanel
-//updateManagementPanel();
+updateManagementPanel();
 
 function createStoreMenu() {
     panel.innerHTML = "";
@@ -163,14 +164,21 @@ function createStoreMenu() {
     }
 }
 
-function ally(name, hp, skills, mp) {
+function ally(name, hp, skills, mp, id, price, desc) {
     this.name = name;
     this.hp = hp;
     this.maxhp = hp;
     this.skills = skills;
     this.mp = mp;
     this.maxmp = mp;
-    party.push(this);    
+    this.id = id;
+    this.price = price
+    this.desc = desc;
+    this.usable = true;
+    ally_store_list.push(this);
+    if (id == 0) {
+        party.push(this);
+    }
 } //creating an ally
 
 function skill(name, type, effect, price) {
@@ -183,9 +191,6 @@ function skill(name, type, effect, price) {
 var skill_arr = [new skill("cios", "dmg", 50, 3), new skill("orzeźwienie", "hel", 20, 6), new skill("tarcza", "def", 20, 3),
 new skill("ciemna magia", "dmg", 180, 9), new skill("modlitwa", "amp", 100, 12)];
 
-var mc = new ally("player", 100, [0,1,2], 100);
-var test_ally = new ally("test", 100, [0,2], 999);
-
 var party_panel;
 var skill_panel;
 
@@ -193,6 +198,7 @@ function createCombatPanel() {    //creating a panel for combat choices
     if (panel != null) {
         panel.remove();
     }
+    document.getElementById("management-fade").remove();
     panel = document.createElement("div");
     
     panel.style.top = window.innerHeight * 0.7 + "px";
@@ -223,7 +229,7 @@ function createCombatPanel() {    //creating a panel for combat choices
     skill_panel.style.left = window.innerWidth * 0.2 + "px";
     panel.appendChild(skill_panel);
 } //createConbatPanel
-createCombatPanel();
+//createCombatPanel();
 
 var skill_select = 0;
 
@@ -235,9 +241,10 @@ function partyUpdate() {    //updating party members
     status.style.height = "10px";
     status.classList.add('progress-bar-status')
 
+    if (select_y > party.length - 1) select_y = 0;
+
     party_panel.innerHTML = "Party:<br>";
-    for(i=0;i<party.length;i++) {
-        
+    for(i=0;i<party.length;i++) {   
         if (select_y == i && select_x == 0) {
             party_panel.innerHTML += "<span style='color: rgb(197, 173, 137);'>" + party[i].name + "</span><span style='float: right;'>" +
             party[i].mp + "</span>";
@@ -259,7 +266,7 @@ function partyUpdate() {    //updating party members
         skill_panel.innerHTML += "<br>";
     }
 } //partyUpdate
-partyUpdate();
+//partyUpdate();
 
 function limb(name, hp, x, y) {
     this.name = name;
@@ -268,11 +275,11 @@ function limb(name, hp, x, y) {
 
     var graphic = document.createElement("div");
     graphic.style.background = "lime";
-    graphic.style.width = "200px";
-    graphic.style.height = "200px";
+    graphic.style.width = "100px";
+    graphic.style.height = "100px";
     graphic.style.position = "absolute";
-    graphic.style.left = x+"px";
-    graphic.style.top = y+"px";
+    graphic.style.left = x+"vw";
+    graphic.style.top = y/2+"vh";
 
     document.getElementById('main').appendChild(graphic)
 
@@ -280,6 +287,7 @@ function limb(name, hp, x, y) {
 } //creating a boss's limb
 
 var boss;
+var boss_skills;
 
 function test() {
     let limb1 = new limb("lewa reka", 100, 100, 100);
@@ -289,12 +297,64 @@ function test() {
     boss = [limb1, limb2, limb3, limb4];
 }
 
+function boss1() {
+    createCombatPanel()
+    partyUpdate()
+    let limb1 = new limb("trzecia reka", 100, 10, 70);
+    let limb2 = new limb("pierwsza reka", 100, 20, 10);
+    let limb3 = new limb("oko", 250, 50, 50);
+    let limb4 = new limb("czwarta reka", 100, 70, 60);
+    let limb5 = new limb("druga reka", 100, 80, 20);
+    boss = [limb1, limb2, limb3, limb4, limb5];
+    boss_skills = ["cios", "lap", "tarcza"];
+}
+
+var ally_store_list = []
+new ally("player", 100, [0,1,2], 100, 0, 100);
+new ally("Żołnierz", 150, [0,1,2], 100, 1, 500, "opis żołnierza");
+new ally("Mag", 150, [0,1,2], 100, 2, 500, "opis maga");
+new ally("Uzdrowiciel", 150, [0,1,2], 100, 3, 500, "opis uzdrowiciela");
+
+var ally_store_focus_x = 1;
+var ally_store_focus_y = 1;
+
+function createAllyStoreMenu() {
+    panel.innerHTML = "";
+    let ally_store = document.createElement("div");
+    ally_store.id = "ally-store";
+    ally_store.innerHTML = ally_store_list[ally_store_focus_x].name + "<br><br><span style='font-size: 1.5vw;'>Punkty Życia - " +
+    ally_store_list[ally_store_focus_x].maxhp + "<br>Punkty Many - " + ally_store_list[ally_store_focus_x].maxmp +
+    "<br>Cena - " + ally_store_list[ally_store_focus_x].price + "$<br><br>" +
+    ally_store_list[ally_store_focus_x].desc + "<br></span>";
+
+    panel.appendChild(ally_store);
+
+    let button_info = ["kup", "wstecz", 20, 10];
+
+    for(i=0;i<2;i++) {
+        let button = document.createElement("div");
+        button.style.width = window.innerWidth * 0.32 + "px"
+        button.style.marginLeft = 1 + "vw";
+        button.style.bottom = button_info[i + 2] + "vh";
+        button.classList.add("management-button")
+        button.innerHTML = button_info[i];
+        button.id = "ally-button-" + i;
+
+        if(ally_store_focus_y == i) {
+            button.style.border = "5px solid rgb(197, 173, 137)";
+        }
+
+        ally_store.appendChild(button);  
+    }
+}
+
 function nextDay() {
     let fade = document.getElementById('fade');
     fade.style.backgroundColor = "black";
 
     dayOfJourney+=1;
-    fade.innerHTML = "DZIEŃ " + dayOfJourney;
+    if(dayOfJourney != 8) fade.innerHTML = "DZIEŃ " + dayOfJourney;
+    else fade.innerHTML = "WE ŚNIE";
 
     setTimeout(() => {
         fade.style.backgroundColor = "transparent";
@@ -336,10 +396,27 @@ function nextDay() {
         if (dayOfJourney == 7) {
             document.getElementById("next_day").innerHTML = "Zaśnij";
         }
+        if (dayOfJourney == 8) {
+            state = 1;
+            boss1();
+        }
     }, 2000);
     setTimeout(() => {
         fade.innerHTML = "";
     }, 3000);
+}
+
+function enemyTurn() {
+    let target = Math.round(Math.random() * party.length) - 1;
+    let ability =  Math.round(Math.random() * boss_skills.length) - 1;
+    switch(boss_skills) {
+        case "cios":
+            party[target].hp -= 50;
+            break;
+        case "lap":
+            if(party[target].usable) party[target].usable == false;
+            break;  
+    }
 }
 
 var ongoing; //stores used skill when chosing target
@@ -364,6 +441,13 @@ document.addEventListener('keydown', function (event) {
                 boss[enemy_select-1].div.style.border = null;
                 boss[enemy_select].div.style.border = "3px solid black";
                 partyUpdate();
+                break;
+            case 6:
+                if (ally_store_focus_x < ally_store_list.length - 1) ally_store_focus_x += 1;
+                console.log("focus x: " + ally_store_focus_x)
+                console.log(ally_store_list)
+                createAllyStoreMenu();
+                break;
         }
     } else if (event.keyCode == 40) { // down
         switch(state) {
@@ -387,8 +471,12 @@ document.addEventListener('keydown', function (event) {
                 if (select_y != 3) {
                     select_y += 1;
                     createStoreMenu();
-                    console.log(select_y);
                 }
+                break;
+            case 6:
+                if (ally_store_focus_y == 0) ally_store_focus_y = 1;
+                createAllyStoreMenu();
+                break;
         }
 
     } else if (event.keyCode == 37) { // Left
@@ -409,6 +497,13 @@ document.addEventListener('keydown', function (event) {
                 boss[enemy_select+1].div.style.border = null;
                 boss[enemy_select].div.style.border = "3px solid black";
                 partyUpdate();
+                break;
+            case 6:
+                if (ally_store_focus_x > 1) ally_store_focus_x -= 1;
+                console.log("focus x: " + ally_store_focus_x)
+                console.log(ally_store_list)
+                createAllyStoreMenu();
+                break;
         }
         
     } else if (event.keyCode == 38) { // Up
@@ -433,6 +528,11 @@ document.addEventListener('keydown', function (event) {
                     select_y -= 1
                     createStoreMenu();
                 }
+                break;
+            case 6:
+                if (ally_store_focus_y == 1) ally_store_focus_y = 0
+                createAllyStoreMenu();
+                break;
         }
         
     } else if (event.keyCode == 32) { //Space
@@ -474,8 +574,7 @@ document.addEventListener('keydown', function (event) {
                 break;
             case 1:
                 if (select_x == 1) {        //space in combat menu
-                    console.log(party[select_y].skills[skill_select].name);
-                    switch(party[select_y].skills[skill_select].type) {
+                    switch(skill_arr[party[select_y].skills[skill_select]].type) {
                         case "dmg":
                             boss[enemy_select].div.style.border = "3px solid black";
                             ongoing = party[select_y].skills[i];
@@ -513,6 +612,12 @@ document.addEventListener('keydown', function (event) {
                             ship[3] += 200;
                         }
                         break;
+                    case 2:
+                        if(ally_store_list.length > 1) {
+                            createAllyStoreMenu();
+                            state = 6;
+                        }
+                        break;
                     case 3:
                         state = 0;
                         createManagementPanel();
@@ -520,6 +625,23 @@ document.addEventListener('keydown', function (event) {
                         break;
                 }
                 document.getElementById("money").innerHTML = ship[4] + "$";
-        }   
-}});
-test();
+                break;
+            case 6:
+                if(ally_store_focus_y == 1) {
+                    createStoreMenu();
+                    state = 5;
+                } else {
+                    if (ally_store_list[ally_store_focus_x].price <= ship[4]) {
+                        party.push(ally_store_list[ally_store_focus_x]);
+                        ship[4] -= ally_store_list[ally_store_focus_x].price
+                        ally_store_list.splice(ally_store_focus_x, 1);
+                        ally_store_focus_x = 1;
+                        createStoreMenu();
+                        state = 5;
+                        updateManagementPanel();
+                    }
+                }
+        }
+    }
+});
+//test();
