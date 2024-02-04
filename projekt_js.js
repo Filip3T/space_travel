@@ -1,8 +1,8 @@
 //creating a party
 
 var party = [];             // array of party members
-var state = 0;              // 0 - management    1 - combat_skill_select    2 - combat_enemy_select    3 - story    5 - store   6 -
-var select_x = 0;           // select on x axis
+var state = 0;              // 0 - management    1 - combat_skill_select    2 - combat_enemy_select    3 - story    5 - store   6 - allies  7 - health and amp selection
+var select_x = 1;           // select on x axis
 var select_y = 1;           // select on y axis (it's easier this way)
 
 var panel;
@@ -61,10 +61,10 @@ function createManagementPanel() {
         day_tile.style.marginTop = window.innerHeight * 0.002;
         day.appendChild(day_tile);
         if (dayOfJourney + i - 2 > 0 && dayOfJourney + i - 2 < 7) {
-            day_tile.innerHTML = dayOfJourney + (i - 2);
+            day_tile.innerHTML = dayOfJourney * weekOfJouney + (i - 2);
         } else if (dayOfJourney + i - 2 == 7) {
             day_tile.style.color ="rgba(222, 68, 51," + grad[i] + ")";
-            day_tile.innerHTML = dayOfJourney + (i - 2);
+            day_tile.innerHTML = dayOfJourney * weekOfJouney + (i - 2);
         } else {
             day_tile.innerHTML = "";
         }
@@ -94,7 +94,6 @@ function createManagementPanel() {
     } else {
         button.innerHTML = "Zaśnij";
     }
-    console.log(dayOfJourney);
     button.style.top = window.innerHeight * 0.85 + "px";
     button.style.marginLeft = "0px";
 
@@ -166,6 +165,7 @@ function createStoreMenu() {
 
 function ally(name, hp, skills, mp, id, price, desc) {
     this.name = name;
+    this.org_name = name;
     this.hp = hp;
     this.maxhp = hp;
     this.skills = skills;
@@ -175,6 +175,7 @@ function ally(name, hp, skills, mp, id, price, desc) {
     this.price = price
     this.desc = desc;
     this.usable = true;
+    this.protected = false;
     ally_store_list.push(this);
     if (id == 0) {
         party.push(this);
@@ -193,11 +194,15 @@ new skill("ciemna magia", "dmg", 180, 9), new skill("modlitwa", "amp", 100, 12)]
 
 var party_panel;
 var skill_panel;
+var desc_panel;
 
 function createCombatPanel() {    //creating a panel for combat choices
     if (panel != null) {
         panel.remove();
     }
+    
+    document.getElementById("money").remove();
+
     document.getElementById("management-fade").remove();
     panel = document.createElement("div");
     
@@ -224,10 +229,13 @@ function createCombatPanel() {    //creating a panel for combat choices
     panel.appendChild(party_panel);
 
     skill_panel = document.createElement("div");
-    skill_panel.style.position = "absolute";
     skill_panel.id = "skill-panel";
     skill_panel.style.left = window.innerWidth * 0.2 + "px";
     panel.appendChild(skill_panel);
+
+    desc_panel = document.createElement("div");
+    desc_panel.id = "desc-panel";
+    panel.appendChild(desc_panel);
 } //createConbatPanel
 //createCombatPanel();
 
@@ -245,7 +253,7 @@ function partyUpdate() {    //updating party members
 
     party_panel.innerHTML = "Party:<br>";
     for(i=0;i<party.length;i++) {   
-        if (select_y == i && select_x == 0) {
+        if (who == i) {
             party_panel.innerHTML += "<span style='color: rgb(197, 173, 137);'>" + party[i].name + "</span><span style='float: right;'>" +
             party[i].mp + "</span>";
         } else {
@@ -253,17 +261,32 @@ function partyUpdate() {    //updating party members
         }
         party_panel.innerHTML += "<br>";
         party_panel.appendChild(progressBar)
+        if(party[i].protected) status.style.background = "rgb(30, 123, 123)";
+        else status.style.background = "rgb(107, 87, 70)";
         status.style.width = party[i].hp / party[i].maxhp * 100 + "%"; 
         progressBar.appendChild(status);
     }
     skill_panel.innerHTML = "Skills:<br>";
-    for(i=0;i<party[select_y].skills.length;i++) {
+    for(i=0;i<party[who].skills.length;i++) {
         if (skill_select == i && select_x == 1) {
-            skill_panel.innerHTML += "<span style='color: rgb(197, 173, 137);'>" + skill_arr[party[select_y].skills[i]].name + "</span>";
+            skill_panel.innerHTML += "<span style='color: rgb(197, 173, 137);'>" + skill_arr[party[who].skills[i]].name + "</span>";
         } else {
-            skill_panel.innerHTML += skill_arr[party[select_y].skills[i]].name;
+            skill_panel.innerHTML += skill_arr[party[who].skills[i]].name;
         }
         skill_panel.innerHTML += "<br>";
+    }
+    let usable = party.length;
+    for(i=0;i<party.length;i++) {
+        if(party[i].hp <= 0) {
+            party[i].usable = false;
+            usable--;
+        } 
+    }
+    if(usable==0) {
+        let fade = document.getElementById('fade');
+        fade.style.backgroundColor = "black";
+        fade.innerHTML = "KONIEC";
+        state = 4;
     }
 } //partyUpdate
 //partyUpdate();
@@ -274,6 +297,7 @@ function limb(name, hp, x, y) {
     this.maxhp = hp;
 
     var graphic = document.createElement("div");
+    graphic.id = name;
     graphic.style.background = "lime";
     graphic.style.width = "100px";
     graphic.style.height = "100px";
@@ -384,10 +408,10 @@ function nextDay() {
                 day_cont.style.left = 20 * i + 1 + "%";
                 day_cont.id = "tile-" + i;
                 if (dayOfJourney + i - 2 > 0 && dayOfJourney + i - 2 < 7) {
-                    day_cont.innerHTML = dayOfJourney + (i - 2);
+                    day_cont.innerHTML = dayOfJourney * weekOfJouney + (i - 2);
                 } else if (dayOfJourney + i - 2 == 7) {
                     day_cont.style.color ="rgba(222, 68, 51," + grad[i] + ")";
-                    day_cont.innerHTML = dayOfJourney + (i - 2);
+                    day_cont.innerHTML = dayOfJourney * weekOfJouney + (i - 2);
                 } else {
                     day_cont.innerHTML = "";
                 }
@@ -397,6 +421,7 @@ function nextDay() {
             document.getElementById("next_day").innerHTML = "Zaśnij";
         }
         if (dayOfJourney == 8) {
+            select_x = 1;
             state = 1;
             boss1();
         }
@@ -407,240 +432,322 @@ function nextDay() {
 }
 
 function enemyTurn() {
-    let target = Math.round(Math.random() * party.length) - 1;
-    let ability =  Math.round(Math.random() * boss_skills.length) - 1;
-    switch(boss_skills) {
-        case "cios":
-            party[target].hp -= 50;
-            break;
-        case "lap":
-            if(party[target].usable) party[target].usable == false;
-            break;  
+    if(turns > 0) {
+        console.log(turns)
+        turn = false;
+        console.log("start tury");
+        let target = Math.round(Math.random() * (party.length - 1));
+        let ability =  boss_skills[Math.round(Math.random() * (boss_skills.length - 1))];
+        console.log("ability:" + ability)
+        switch(ability) {
+            case "cios":
+                console.log("name" + party[target].name);
+                party[target].hp -= 10;
+                desc_panel.innerHTML = "Cios";
+                break;
+            case "lap":
+                console.log("name" + party[target].name);
+                if(party[target].usable) party[target].usable == false;
+                desc_panel.innerHTML = "Lap";
+                break;
+        }
+        console.log("cos");
+        partyUpdate();
+        setTimeout(() => {
+            desc_panel.innerHTML = "";
+            turns--;
+            enemyTurn();  
+        }, 3000);
+    } else {
+        console.log("koniec")
+        turn = true;
+        for(i=0;i<party.length;i++) {
+            if (party[i].usable) turns++;
+        }
     }
 }
 
 var ongoing; //stores used skill when chosing target
 var enemy_select = 0; //stores selected enemy
+var turns = 1;
+var turn = true;
+var who = 0;
+var type = "";
 
 document.addEventListener('keydown', function (event) {
-    if (event.keyCode == 39) {        // Right
-        switch(state) {
-            case 0: //right in management menu
-                if (select_x < 3 && select_y == 0) {
-                    document.getElementById("button-" + select_x).style.border = "5px solid rgb(107, 87, 70)";
-                    select_x += 1;
-                    document.getElementById("button-" + select_x).style.border = "5px solid rgb(197, 173, 137)";
-                } 
-                break;
-            case 1: //right in combat menu
-                if (select_x == 0) select_x = 1;
-                partyUpdate();
-                break;
-            case 2: // right in enemy select
-                if (enemy_select < boss.length - 1) enemy_select += 1;
-                boss[enemy_select-1].div.style.border = null;
-                boss[enemy_select].div.style.border = "3px solid black";
-                partyUpdate();
-                break;
-            case 6:
-                if (ally_store_focus_x < ally_store_list.length - 1) ally_store_focus_x += 1;
-                console.log("focus x: " + ally_store_focus_x)
-                console.log(ally_store_list)
-                createAllyStoreMenu();
-                break;
-        }
-    } else if (event.keyCode == 40) { // down
-        switch(state) {
-            case 0: //down in management menu
-                if (select_y == 0) {
-                    select_y = 1;
-                    document.getElementById("button-" + select_x).style.border = "5px solid rgb(107, 87, 70)";
-                    document.getElementById("next_day").style.border = "5px solid rgb(197, 173, 137)";
-
-                }
-                break;
-            case 1:     //down in combat menu
-                if (select_y < party.length - 1 && select_x == 0) {
-                    select_y += 1;
-                } else if (skill_select < party[select_y].skills.length - 1 && select_x == 1) {
-                    skill_select += 1;
-                }
-                partyUpdate();
-                break;
-            case 5:
-                if (select_y != 3) {
-                    select_y += 1;
-                    createStoreMenu();
-                }
-                break;
-            case 6:
-                if (ally_store_focus_y == 0) ally_store_focus_y = 1;
-                createAllyStoreMenu();
-                break;
-        }
-
-    } else if (event.keyCode == 37) { // Left
-        switch(state) {
-            case 0:
-                if (select_x >= 1 && select_y == 0) {
-                    document.getElementById("button-" + select_x).style.border = "5px solid rgb(107, 87, 70)";
-                    select_x -= 1;
-                    document.getElementById("button-" + select_x).style.border = "5px solid rgb(197, 173, 137)";
-                }
-                break;
-            case 1:     //left in combat menu
-                if (select_x == 1) select_x = 0;
-                partyUpdate();
-                break;
-            case 2:     //left in enemy selection
-                if (enemy_select != 0) enemy_select -= 1;
-                boss[enemy_select+1].div.style.border = null;
-                boss[enemy_select].div.style.border = "3px solid black";
-                partyUpdate();
-                break;
-            case 6:
-                if (ally_store_focus_x > 1) ally_store_focus_x -= 1;
-                console.log("focus x: " + ally_store_focus_x)
-                console.log(ally_store_list)
-                createAllyStoreMenu();
-                break;
-        }
-        
-    } else if (event.keyCode == 38) { // Up
-        switch(state) {
-            case 0: //up in management menu
+    if(turn) {
+        if (event.keyCode == 39) {        // Right
+            switch(state) {
+                case 0: //right in management menu
+                    if (select_x < 3 && select_y == 0) {
+                        document.getElementById("button-" + select_x).style.border = "5px solid rgb(107, 87, 70)";
+                        select_x += 1;
+                        document.getElementById("button-" + select_x).style.border = "5px solid rgb(197, 173, 137)";
+                    } 
+                    break;
+                case 2: // right in enemy select
+                    if (boss.length > 1) {
+                        if (enemy_select < boss.length - 1) enemy_select += 1;
+                        boss[enemy_select-1].div.style.border = null;
+                        boss[enemy_select].div.style.border = "3px solid black";
+                        partyUpdate();
+                    }
+                    break;
+                case 6:
+                    if (ally_store_focus_x < ally_store_list.length - 1) ally_store_focus_x += 1;
+                    console.log("focus x: " + ally_store_focus_x)
+                    console.log(ally_store_list)
+                    createAllyStoreMenu();
+                    break;
+            }
+        } else if (event.keyCode == 40) { // down
+            switch(state) {
+                case 0: //down in management menu
+                    if (select_y == 0) {
+                        select_y = 1;
+                        document.getElementById("button-" + select_x).style.border = "5px solid rgb(107, 87, 70)";
+                        document.getElementById("next_day").style.border = "5px solid rgb(197, 173, 137)";
+                    }
+                    break;
+                case 1:     //down in combat menu
+                    if (skill_select < party[select_y].skills.length - 1) skill_select += 1;
+                    partyUpdate();
+                    break;
+                case 5:
+                    if (select_y != 3) {
+                        select_y += 1;
+                        createStoreMenu();
+                    }
+                    break;
+                case 6:
+                    if (ally_store_focus_y == 0) ally_store_focus_y = 1;
+                    createAllyStoreMenu();
+                    break;
+                case 7:
+                    if (select_y < party.length - 1){
+                        party[select_y].name = party[select_y].org_name
+                        select_y++;
+                        party[select_y].name = party[select_y].name + " <<<";
+                        partyUpdate();
+                    } 
+                    break;
+            }
+        } else if (event.keyCode == 37) { // Left
+            switch(state) {
                 case 0:
-                if (select_y == 1) {
-                    select_y = 0;
-                    document.getElementById("button-" + select_x).style.border = "5px solid rgb(197, 173, 137)"; 
-                    document.getElementById("next_day").style.border = "5px solid rgb(107, 87, 70)";
-
-                }
-                break;
-            case 1:     //up in combat menu
-                if (select_y != 0 && select_x == 0) {
-                    select_y -= 1;
-                } else if (skill_select != 0 && state == 1) skill_select -= 1;
-                partyUpdate();
-                break;
-            case 5:
-                if (select_y != 0) {
-                    select_y -= 1
-                    createStoreMenu();
-                }
-                break;
-            case 6:
-                if (ally_store_focus_y == 1) ally_store_focus_y = 0
-                createAllyStoreMenu();
-                break;
-        }
-        
-    } else if (event.keyCode == 32) { //Space
-        switch(state) {
-            case 0:     //space in management menu
-                if (select_y == 1) {
-                    nextDay();
-                    ship[4] += 400;
-                } else {
-                    switch(select_x) {
-                        case 0:
-                            ship[0] += 70;
-                            ship[1] -= 20;
+                    if (select_x >= 1 && select_y == 0) {
+                        document.getElementById("button-" + select_x).style.border = "5px solid rgb(107, 87, 70)";
+                        select_x -= 1;
+                        document.getElementById("button-" + select_x).style.border = "5px solid rgb(197, 173, 137)";
+                    }
+                    break;
+                case 2:     //left in enemy selection
+                    if(boss.length > 1) {
+                        if (enemy_select != 0) enemy_select -= 1;
+                        boss[enemy_select+1].div.style.border = null;
+                        boss[enemy_select].div.style.border = "3px solid black";
+                        partyUpdate();
+                    }
+                    break;
+                case 6:
+                    if (ally_store_focus_x > 1) ally_store_focus_x -= 1;
+                    console.log("focus x: " + ally_store_focus_x)
+                    console.log(ally_store_list)
+                    createAllyStoreMenu();
+                    break;
+            }
+        } else if (event.keyCode == 38) { // Up
+            switch(state) {
+                case 0: //up in management menu
+                    case 0:
+                    if (select_y == 1) {
+                        select_y = 0;
+                        document.getElementById("button-" + select_x).style.border = "5px solid rgb(197, 173, 137)"; 
+                        document.getElementById("next_day").style.border = "5px solid rgb(107, 87, 70)";
+                    }
+                    break;
+                case 1:     //up in combat menu
+                    if (skill_select != 0 && state == 1) skill_select -= 1;
+                    partyUpdate();
+                    break;
+                case 5:
+                    if (select_y != 0) {
+                        select_y -= 1
+                        createStoreMenu();
+                    }
+                    break;
+                case 6:
+                    if (ally_store_focus_y == 1) ally_store_focus_y = 0
+                    createAllyStoreMenu();
+                    break;
+                case 7:
+                    if (select_y > 0){
+                        party[select_y].name = party[select_y].org_name;
+                        select_y--;    
+                        party[select_y].name = party[select_y].name + " <<<";
+                        partyUpdate();
+                    }
+                    break;
+            }
+        } else if (event.keyCode == 32) { //Space
+            switch(state) {
+                case 0:     //space in management menu
+                    if (select_y == 1) {
+                        nextDay();
+                        ship[4] += 400;
+                    } else {
+                        switch(select_x) {
+                            case 0:
+                                ship[0] += 70;
+                                ship[1] -= 20;
+                                updateManagementPanel();
+                                break;
+                            case 1:
+                                createStoreMenu();
+                                break;
+                            case 2:
+                                ship[4] += 250;
+                                ship[1] -= 100;
+                                updateManagementPanel();
+                                break;
+                            case 3:
+                                ship[1] += 280;
+                                nextDay();
+                        }
+                    }
+                    break;
+                case 2:     //space in enemy selection
+                    if (boss[enemy_select].hp > 50){
+                        boss[enemy_select].hp -= 50;
+                        boss[enemy_select].div.style.background = "hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%)";
+                    } else {
+                        document.getElementById(boss[enemy_select].name).remove();
+                        boss.splice(enemy_select, 1);
+                        if (boss.length == 0) {
+                            createManagementPanel();
                             updateManagementPanel();
+                            state = 0;
+                            weekOfJouney++;
+                            dayOfJourney = 1;
+                        } else {
+                            boss[enemy_select].div.style.border = null;
+                        }
+                    }
+                    state = 1;
+                    console.log(turns);
+                    turns -= 1;
+                    if(turns == 0) {
+                        turns = boss.length;
+                        who = 0;
+                        enemyTurn();
+                    }
+                    else who++;
+                    select_x = 1;
+                    partyUpdate();
+                    break;
+                case 1:
+                    if (select_x == 1) {        //space in combat menu
+                        switch(skill_arr[party[select_y].skills[skill_select]].type) {
+                            case "dmg":
+                                boss[enemy_select].div.style.border = "3px solid black";
+                                ongoing = party[select_y].skills[i];
+                                state = 2;
+                                break;
+                            case "hel":
+                                console.log("hel");
+                                state = 7
+                                type = "hel";
+                                party[select_y].name += " <<<";
+                                break;
+                            case "amp":
+                                console.log("amp");
+                                state = 7
+                                type = "amp";
+                                party[select_y].name += " <<<";
+                                break;
+                            case "def":
+                                console.log("def");
+                                state = 7
+                                type = "def";
+                                party[select_y].name += " <<<";
+                                break;
+                        }
+                        partyUpdate();
+                    }
+                    break;
+                case 3:
+                    state = 0;
+                    createManagementPanel();
+                    updateManagementPanel();
+                    break;
+                case 5:
+                    switch (select_y) {
+                        case 0:
+                            if (ship[4] >= 100) {
+                                ship[4] -= 100;
+                                ship[2] += 100;
+                            }
                             break;
                         case 1:
-                            createStoreMenu();
+                            if (ship[4] >= 200) {
+                                ship[4] -= 200;
+                                ship[3] += 200;
+                            }
                             break;
                         case 2:
-                            ship[4] += 250;
-                            ship[1] -= 100;
-                            updateManagementPanel();
+                            if(ally_store_list.length > 1) {
+                                createAllyStoreMenu();
+                                state = 6;
+                            }
                             break;
                         case 3:
-                            ship[1] += 280;
-                            nextDay();
-                    }
-                }
-                break;
-            case 2:     //space in enemy selection
-                if (boss[enemy_select].hp > 10){
-                    boss[enemy_select].hp -= 10;
-                    boss[enemy_select].div.style.background = "hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%)";
-                }
-                boss[enemy_select].div.style.border = null;
-                state = 1;
-                select_x = 0;
-                partyUpdate();
-                break;
-            case 1:
-                if (select_x == 1) {        //space in combat menu
-                    switch(skill_arr[party[select_y].skills[skill_select]].type) {
-                        case "dmg":
-                            boss[enemy_select].div.style.border = "3px solid black";
-                            ongoing = party[select_y].skills[i];
-                            state = 2;
-                            break;
-                        case "hel":
-                            console.log("hel");
-                            break;
-                        case "amp":
-                            console.log("amp");
-                            break;
-                        case "def":
-                            console.log("def");
+                            state = 0;
+                            createManagementPanel();
+                            select_y = 1;
                             break;
                     }
-
-                }
-                break;
-            case 3:
-                state = 0;
-                createManagementPanel();
-                updateManagementPanel();
-                break;
-            case 5:
-                switch (select_y) {
-                    case 0:
-                        if (ship[4] >= 100) {
-                            ship[4] -= 100;
-                            ship[2] += 100;
-                        }
-                        break;
-                    case 1:
-                        if (ship[4] >= 200) {
-                            ship[4] -= 200;
-                            ship[3] += 200;
-                        }
-                        break;
-                    case 2:
-                        if(ally_store_list.length > 1) {
-                            createAllyStoreMenu();
-                            state = 6;
-                        }
-                        break;
-                    case 3:
-                        state = 0;
-                        createManagementPanel();
-                        select_y = 1;
-                        break;
-                }
-                document.getElementById("money").innerHTML = ship[4] + "$";
-                break;
-            case 6:
-                if(ally_store_focus_y == 1) {
-                    createStoreMenu();
-                    state = 5;
-                } else {
-                    if (ally_store_list[ally_store_focus_x].price <= ship[4]) {
-                        party.push(ally_store_list[ally_store_focus_x]);
-                        ship[4] -= ally_store_list[ally_store_focus_x].price
-                        ally_store_list.splice(ally_store_focus_x, 1);
-                        ally_store_focus_x = 1;
+                    document.getElementById("money").innerHTML = ship[4] + "$";
+                    break;
+                case 6:
+                    if(ally_store_focus_y == 1) {
                         createStoreMenu();
                         state = 5;
-                        updateManagementPanel();
+                    } else {
+                        if (ally_store_list[ally_store_focus_x].price <= ship[4]) {
+                            party.push(ally_store_list[ally_store_focus_x]);
+                            ship[4] -= ally_store_list[ally_store_focus_x].price
+                            ally_store_list.splice(ally_store_focus_x, 1);
+                            ally_store_focus_x = 1;
+                            createStoreMenu();
+                            turns += 1;
+                            state = 5;
+                            updateManagementPanel();
+                        }
                     }
-                }
+                    break;
+                case 7:
+                    switch(type) {
+                        case "hel":
+                            if(party[select_y].hp + 30 >= party[select_y].maxhp) party[select_y].hp = party[select_y].maxhp;
+                            else party[select_y].hp += 30;
+                            break;
+                        case "def":
+                            party[select_y].protected = true;
+                            break;
+                    }
+                    party[select_y].name = party[select_y].org_name
+                    state = 1;
+                    if(turns == 0) {
+                        turns = boss.length;
+                        who = 0;
+                        enemyTurn();
+                    }
+                    else {
+                        who++;
+                        turns--;
+                    }
+                    partyUpdate();
+            }
         }
     }
 });
