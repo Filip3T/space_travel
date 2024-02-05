@@ -302,12 +302,18 @@ function limb(name, hp, x, y) {
 
     var graphic = document.createElement("div");
     graphic.id = name;
-    graphic.style.background = "lime";
+    graphic.style.background = "black";
     graphic.style.width = "100px";
+    graphic.style.color = "white";
+    graphic.style.display = "flex";
+    graphic.style.alignItems = "center";
+    graphic.style.justifyContent = "center";
     graphic.style.height = "100px";
     graphic.style.position = "absolute";
     graphic.style.left = x+"vw";
     graphic.style.top = y/2+"vh";
+
+    this.effect = -1;
 
     document.getElementById('main').appendChild(graphic)
 
@@ -459,10 +465,14 @@ function enemyTurn() {
                     desc_panel.innerHTML = boss[boss.length - turns].name + " stara sie złapać jednego z twoich towarzyszy.<br>" + 
                     party[target].name + " traci tarcze.";
                     party[target].protected = false;
+                } else if (party[target].usable == false) {
+                    desc_panel.innerHTML = boss[boss.length - turns].name + " stara sie złapać jednego z twoich towarzyszy ale byl on juz zlapany<br>"
                 } else {
                     party[target].usable = false;
                     desc_panel.innerHTML = boss[boss.length - turns].name + " stara sie złapać jednego z twoich towarzyszy.<br>" +
                     party[target].name + " zostaje złapany.";
+                    boss[boss.length - turns].effect = target;
+                    boss[boss.length - turns].div.style.background = "white";
                 }
                 break;
             case "tarcza":
@@ -504,8 +514,10 @@ document.addEventListener('keydown', function (event) {
                 case 2: // right in enemy select
                     if (boss.length > 1) {
                         if (enemy_select < boss.length - 1) enemy_select += 1;
-                        boss[enemy_select-1].div.style.border = null;
-                        boss[enemy_select].div.style.border = "3px solid black";
+                        boss[enemy_select-1].div.style.filter = "drop-shadow(0px 0px 0px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
+                        boss[enemy_select-1].div.innerHTML = "";
+                        boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 10px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
+                        boss[enemy_select].div.innerHTML = boss[enemy_select].hp + " / " + boss[enemy_select].maxhp;
                         partyUpdate();
                     }
                     break;
@@ -558,8 +570,10 @@ document.addEventListener('keydown', function (event) {
                 case 2:     //left in enemy selection
                     if(boss.length > 1) {
                         if (enemy_select != 0) enemy_select -= 1;
-                        boss[enemy_select+1].div.style.border = null;
-                        boss[enemy_select].div.style.border = "3px solid black";
+                        boss[enemy_select+1].div.style.filter = "drop-shadow(0px 0px 0px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
+                        boss[enemy_select+1].div.innerHTML = "";
+                        boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 10px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
+                        boss[enemy_select].div.innerHTML = boss[enemy_select].hp + " / " + boss[enemy_select].maxhp;
                         partyUpdate();
                     }
                     break;
@@ -631,7 +645,15 @@ document.addEventListener('keydown', function (event) {
                 case 2:     //space in enemy selection
                     if (boss[enemy_select].hp > 50){
                         boss[enemy_select].hp -= 50;
-                        boss[enemy_select].div.style.background = "hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%)";
+                        boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 10px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
+                        boss[enemy_select].div.innerHTML = boss[enemy_select].hp + " / " + boss[enemy_select].maxhp;
+                        if(boss[enemy_select].effect != -1) {
+                            if (party[boss[enemy_select].effect].hp > 0) {
+                                party[boss[enemy_select].effect].usable = true;
+                            }
+                            boss[enemy_select].div.style.background = black;
+                            boss[enemy_select].effect = -1;
+                        }
                     } else {
                         document.getElementById(boss[enemy_select].name).remove();
                         boss.splice(enemy_select, 1);
@@ -643,7 +665,8 @@ document.addEventListener('keydown', function (event) {
                             createManagementPanel();
                             updateManagementPanel();
                         } else {
-                            boss[enemy_select].div.style.border = null;
+                            boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 0px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
+                            boss[enemy_select].div.innerHTML = "";
                         }
                     }
                     turns -= 1;
@@ -666,7 +689,8 @@ document.addEventListener('keydown', function (event) {
                     if (select_x == 1) {        //space in combat menu
                         switch(skill_arr[party[select_y].skills[skill_select]].type) {
                             case "dmg":
-                                boss[enemy_select].div.style.border = "3px solid black";
+                                boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 10px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
+                                boss[enemy_select].div.innerHTML = boss[enemy_select].hp + " / " + boss[enemy_select].maxhp;
                                 ongoing = party[select_y].skills[i];
                                 state = 2;
                                 break;
