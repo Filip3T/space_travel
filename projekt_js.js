@@ -7,7 +7,7 @@ var select_y = 1;           // select on y axis (it's easier this way)
 
 var panel;
 var dayOfJourney = 1;
-var weekOfJouney = 1;
+var weekOfJouney = 0;
 
 var bars = ["stan statku", "morale", "paliwo", "racje"];
 var buttons = ["napraw", "kup", "pracuj", "wolne"];
@@ -61,10 +61,10 @@ function createManagementPanel() {
         day_tile.style.marginTop = window.innerHeight * 0.002;
         day.appendChild(day_tile);
         if (dayOfJourney + i - 2 > 0 && dayOfJourney + i - 2 < 7) {
-            day_tile.innerHTML = dayOfJourney * weekOfJouney + (i - 2);
+            day_tile.innerHTML = (dayOfJourney + weekOfJouney * 7) + (i - 2);
         } else if (dayOfJourney + i - 2 == 7) {
             day_tile.style.color ="rgba(222, 68, 51," + grad[i] + ")";
-            day_tile.innerHTML = dayOfJourney * weekOfJouney + (i - 2);
+            day_tile.innerHTML = (dayOfJourney + weekOfJouney * 7) + (i - 2);
         } else {
             day_tile.innerHTML = "";
         }
@@ -261,7 +261,11 @@ function partyUpdate() {    //updating party members
         }
         party_panel.innerHTML += "<br>";
         party_panel.appendChild(progressBar)
+        console.log("who: " + who);
         if(party[i].protected) status.style.background = "rgb(30, 123, 123)";
+        else if (party[i].usable == false) {
+            status.style.background = "rgb(153, 51, 51)";
+        } 
         else status.style.background = "rgb(107, 87, 70)";
         status.style.width = party[i].hp / party[i].maxhp * 100 + "%"; 
         progressBar.appendChild(status);
@@ -277,7 +281,7 @@ function partyUpdate() {    //updating party members
     }
     let usable = party.length;
     for(i=0;i<party.length;i++) {
-        if(party[i].hp <= 0) {
+        if(party[i].hp <= 0 || party[i].usable == false) {
             party[i].usable = false;
             usable--;
         } 
@@ -373,11 +377,12 @@ function createAllyStoreMenu() {
 }
 
 function nextDay() {
+    turn = false;
     let fade = document.getElementById('fade');
     fade.style.backgroundColor = "black";
 
     dayOfJourney+=1;
-    if(dayOfJourney != 8) fade.innerHTML = "DZIEŃ " + dayOfJourney;
+    if(dayOfJourney != 8) fade.innerHTML = "DZIEŃ " + (dayOfJourney + weekOfJouney * 7);
     else fade.innerHTML = "WE ŚNIE";
 
     setTimeout(() => {
@@ -408,10 +413,10 @@ function nextDay() {
                 day_cont.style.left = 20 * i + 1 + "%";
                 day_cont.id = "tile-" + i;
                 if (dayOfJourney + i - 2 > 0 && dayOfJourney + i - 2 < 7) {
-                    day_cont.innerHTML = dayOfJourney * weekOfJouney + (i - 2);
+                    day_cont.innerHTML = (dayOfJourney + weekOfJouney * 7) + (i - 2);
                 } else if (dayOfJourney + i - 2 == 7) {
                     day_cont.style.color ="rgba(222, 68, 51," + grad[i] + ")";
-                    day_cont.innerHTML = dayOfJourney * weekOfJouney + (i - 2);
+                    day_cont.innerHTML = (dayOfJourney + weekOfJouney * 7) + (i - 2);
                 } else {
                     day_cont.innerHTML = "";
                 }
@@ -428,38 +433,49 @@ function nextDay() {
     }, 2000);
     setTimeout(() => {
         fade.innerHTML = "";
+        turn = true;
     }, 3000);
 }
 
 function enemyTurn() {
     if(turns > 0) {
-        console.log(turns)
         turn = false;
-        console.log("start tury");
         let target = Math.round(Math.random() * (party.length - 1));
         let ability =  boss_skills[Math.round(Math.random() * (boss_skills.length - 1))];
-        console.log("ability:" + ability)
         switch(ability) {
             case "cios":
-                console.log("name" + party[target].name);
-                party[target].hp -= 10;
-                desc_panel.innerHTML = "Cios";
+                if (party[target].protected == true) {
+                    desc_panel.innerHTML = boss[boss.length - turns].name + " używa ciosu.<br>" + 
+                    party[target].name + " traci tarcze.";
+                    party[target].protected = false;
+                } else {
+                    party[target].hp -= 40;
+                    desc_panel.innerHTML = boss[boss.length - turns].name + " używa ciosu.<br>" +
+                    party[target].name + " traci 40PŻ.";
+                }
                 break;
             case "lap":
-                console.log("name" + party[target].name);
-                if(party[target].usable) party[target].usable == false;
-                desc_panel.innerHTML = "Lap";
+                if (party[target].protected == true) {
+                    desc_panel.innerHTML = boss[boss.length - turns].name + " stara sie złapać jednego z twoich towarzyszy.<br>" + 
+                    party[target].name + " traci tarcze.";
+                    party[target].protected = false;
+                } else {
+                    party[target].usable = false;
+                    desc_panel.innerHTML = boss[boss.length - turns].name + " stara sie złapać jednego z twoich towarzyszy.<br>" +
+                    party[target].name + " zostaje złapany.";
+                }
+                break;
+            case "tarcza":
+                desc_panel.innerHTML = "Tarcza";
                 break;
         }
-        console.log("cos");
         partyUpdate();
         setTimeout(() => {
             desc_panel.innerHTML = "";
             turns--;
             enemyTurn();  
-        }, 3000);
+        }, 5000);
     } else {
-        console.log("koniec")
         turn = true;
         for(i=0;i<party.length;i++) {
             if (party[i].usable) turns++;
@@ -495,8 +511,6 @@ document.addEventListener('keydown', function (event) {
                     break;
                 case 6:
                     if (ally_store_focus_x < ally_store_list.length - 1) ally_store_focus_x += 1;
-                    console.log("focus x: " + ally_store_focus_x)
-                    console.log(ally_store_list)
                     createAllyStoreMenu();
                     break;
             }
@@ -551,8 +565,6 @@ document.addEventListener('keydown', function (event) {
                     break;
                 case 6:
                     if (ally_store_focus_x > 1) ally_store_focus_x -= 1;
-                    console.log("focus x: " + ally_store_focus_x)
-                    console.log(ally_store_list)
                     createAllyStoreMenu();
                     break;
             }
@@ -623,27 +635,32 @@ document.addEventListener('keydown', function (event) {
                     } else {
                         document.getElementById(boss[enemy_select].name).remove();
                         boss.splice(enemy_select, 1);
+                        enemy_select = 0;
                         if (boss.length == 0) {
-                            createManagementPanel();
-                            updateManagementPanel();
                             state = 0;
                             weekOfJouney++;
                             dayOfJourney = 1;
+                            createManagementPanel();
+                            updateManagementPanel();
                         } else {
                             boss[enemy_select].div.style.border = null;
                         }
                     }
-                    state = 1;
-                    console.log(turns);
                     turns -= 1;
                     if(turns == 0) {
                         turns = boss.length;
                         who = 0;
+                        while(party[who].usable == false) who++;
                         enemyTurn();
                     }
-                    else who++;
-                    select_x = 1;
+                    else {
+                        who++;
+                        while(party[who].usable == false) who++;
+                    }
+                    console.log("turns: " + turns);
                     partyUpdate();
+                    state = 1;
+                    select_x = 1;
                     break;
                 case 1:
                     if (select_x == 1) {        //space in combat menu
@@ -737,14 +754,17 @@ document.addEventListener('keydown', function (event) {
                     }
                     party[select_y].name = party[select_y].org_name
                     state = 1;
+                    turns--;
+                    console.log("turns: " + turns);
                     if(turns == 0) {
                         turns = boss.length;
                         who = 0;
+                        while(party[who].usable == false) who++;
                         enemyTurn();
                     }
                     else {
-                        who++;
-                        turns--;
+                        who++
+                        while(party[who].usable == false) who++;
                     }
                     partyUpdate();
             }
