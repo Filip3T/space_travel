@@ -163,17 +163,16 @@ function createStoreMenu() {
     }
 }
 
-function ally(name, hp, skills, mp, id, price, desc) {
+function ally(name, hp, skills, id, price, desc) {
     this.name = name;
     this.org_name = name;
     this.hp = hp;
     this.maxhp = hp;
     this.skills = skills;
-    this.mp = mp;
-    this.maxmp = mp;
     this.id = id;
     this.price = price
     this.desc = desc;
+    this.boost = 1;
     this.usable = true;
     this.protected = false;
     ally_store_list.push(this);
@@ -182,15 +181,15 @@ function ally(name, hp, skills, mp, id, price, desc) {
     }
 } //creating an ally
 
-function skill(name, type, effect, price) {
+function skill(name, type, effect) {
     this.name = name;
     this.type = type; //dmg - atak  hel - zdrowie   def - tarcza    amp - dmg boost
     this.effect = effect;
-    this.price = price;
 }
 
-var skill_arr = [new skill("cios", "dmg", 50, 3), new skill("orzeźwienie", "hel", 20, 6), new skill("tarcza", "def", 20, 3),
-new skill("ciemna magia", "dmg", 180, 9), new skill("modlitwa", "amp", 100, 12)];
+var skill_arr = [new skill("cios", "dmg", 20), new skill("orzeźwienie", "hel", 20), new skill("tarcza", "def", 20),
+new skill("ciemna magia", "dmg", 40), new skill("modlitwa", "amp", 1.3), new skill("okrzyk bojowy", "amp", 1.7), new skill("strzał", "dmg", 30),
+new skill("znachorstwo", "hel", 40)];
 
 var party_panel;
 var skill_panel;
@@ -254,14 +253,12 @@ function partyUpdate() {    //updating party members
     party_panel.innerHTML = "Party:<br>";
     for(i=0;i<party.length;i++) {   
         if (who == i) {
-            party_panel.innerHTML += "<span style='color: rgb(197, 173, 137);'>" + party[i].name + "</span><span style='float: right;'>" +
-            party[i].mp + "</span>";
+            party_panel.innerHTML += "<span style='color: rgb(197, 173, 137);'>" + party[i].name + "</span>";
         } else {
-            party_panel.innerHTML += party[i].name + "<span style='float: right;'>" + party[i].mp + "</span>";
+            party_panel.innerHTML += party[i].name;
         }
         party_panel.innerHTML += "<br>";
         party_panel.appendChild(progressBar)
-        console.log("who: " + who);
         if(party[i].protected) status.style.background = "rgb(30, 123, 123)";
         else if (party[i].usable == false) {
             status.style.background = "rgb(153, 51, 51)";
@@ -273,7 +270,23 @@ function partyUpdate() {    //updating party members
     skill_panel.innerHTML = "Skills:<br>";
     for(i=0;i<party[who].skills.length;i++) {
         if (skill_select == i && select_x == 1) {
-            skill_panel.innerHTML += "<span style='color: rgb(197, 173, 137);'>" + skill_arr[party[who].skills[i]].name + "</span>";
+            if (turn) {
+                skill_panel.innerHTML += "<span style='color: rgb(197, 173, 137);'>" + skill_arr[party[who].skills[i]].name + "</span>";
+                switch (skill_arr[party[who].skills[i]].type) { //dmg - atak  hel - zdrowie   def - tarcza    amp - dmg boost
+                    case "dmg":
+                        desc_panel.innerHTML = "Zadaje " + skill_arr[party[who].skills[i]].effect * party[who].boost + " punktów obrażeń wybranemu przeciwnikowi.";
+                        break;
+                    case "hel":
+                        desc_panel.innerHTML = "Leczy wybranego towarzysza o " + skill_arr[party[who].skills[i]].effect + " punktów zdrowia.";
+                        break;
+                    case "amp":
+                        desc_panel.innerHTML = "Wzmacnia ataki danego towarzysza x" + skill_arr[party[who].skills[i]].effect + " do końca tury gracza.";
+                        break;
+                    case "def":
+                        desc_panel.innerHTML = "Nadaje tarcze na wybrango towarzysza.";
+                        break;
+                }
+            }
         } else {
             skill_panel.innerHTML += skill_arr[party[who].skills[i]].name;
         }
@@ -295,10 +308,18 @@ function partyUpdate() {    //updating party members
 } //partyUpdate
 //partyUpdate();
 
+function massage(state, massage = "") {
+    let fade = document.getElementById('fade');
+    if (state) fade.style.backgroundColor = "black";
+    else fade.style.backgroundColor = "transparent";
+    fade.innerHTML = massage;
+}
+
 function limb(name, hp, x, y) {
     this.name = name;
     this.hp = hp;
     this.maxhp = hp;
+    this.shield = false;
 
     var graphic = document.createElement("div");
     graphic.id = name;
@@ -344,10 +365,10 @@ function boss1() {
 }
 
 var ally_store_list = []
-new ally("player", 100, [0,1,2], 100, 0, 100);
-new ally("Żołnierz", 150, [0,1,2], 100, 1, 500, "opis żołnierza");
-new ally("Mag", 150, [0,1,2], 100, 2, 500, "opis maga");
-new ally("Uzdrowiciel", 150, [0,1,2], 100, 3, 500, "opis uzdrowiciela");
+new ally("player", 100, [0,2], 0, 100);
+new ally("Żołnierz", 150, [6,2,5], 1, 500, "opis żołnierza");
+new ally("Mag", 150, [3,1], 2, 500, "opis maga");
+new ally("Uzdrowiciel", 150, [7,4], 3, 500, "opis uzdrowiciela");
 
 var ally_store_focus_x = 1;
 var ally_store_focus_y = 1;
@@ -444,6 +465,9 @@ function nextDay() {
 }
 
 function enemyTurn() {
+    for(i=0;i<party.length;i++) {
+        party[i].boost = 1;
+    }
     if(turns > 0) {
         turn = false;
         let target = Math.round(Math.random() * (party.length - 1));
@@ -472,11 +496,15 @@ function enemyTurn() {
                     desc_panel.innerHTML = boss[boss.length - turns].name + " stara sie złapać jednego z twoich towarzyszy.<br>" +
                     party[target].name + " zostaje złapany.";
                     boss[boss.length - turns].effect = target;
-                    boss[boss.length - turns].div.style.background = "white";
+                    boss[boss.length - turns].div.style.background = "rgb(153, 51, 51)";
                 }
                 break;
             case "tarcza":
-                desc_panel.innerHTML = "Tarcza";
+                boss[2].shield = true;
+                if (boss[2].hp + 40 > boss[2].maxhp) boss[2].hp = boss[2].maxhp;
+                else boss[2].hp += 50;
+                boss[2].div.style.background = "cyan";
+                desc_panel.innerHTML = boss[boss.length - turns].name + " tworzy tarcze i leczy wielkie oko."
                 break;
         }
         partyUpdate();
@@ -491,6 +519,9 @@ function enemyTurn() {
             if (party[i].usable) turns++;
         }
     }
+    who = 0;
+    while(party[who].usable == false) who++;
+    partyUpdate();
 }
 
 var ongoing; //stores used skill when chosing target
@@ -517,7 +548,7 @@ document.addEventListener('keydown', function (event) {
                         boss[enemy_select-1].div.style.filter = "drop-shadow(0px 0px 0px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
                         boss[enemy_select-1].div.innerHTML = "";
                         boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 10px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
-                        boss[enemy_select].div.innerHTML = boss[enemy_select].hp + " / " + boss[enemy_select].maxhp;
+                        boss[enemy_select].div.innerHTML = boss[enemy_select].hp + " / " + boss[enemy_select].maxhp + "<br>";
                         partyUpdate();
                     }
                     break;
@@ -573,7 +604,7 @@ document.addEventListener('keydown', function (event) {
                         boss[enemy_select+1].div.style.filter = "drop-shadow(0px 0px 0px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
                         boss[enemy_select+1].div.innerHTML = "";
                         boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 10px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
-                        boss[enemy_select].div.innerHTML = boss[enemy_select].hp + " / " + boss[enemy_select].maxhp;
+                        boss[enemy_select].div.innerHTML = boss[enemy_select].hp + " / " + boss[enemy_select].maxhp + "<br>";
                         partyUpdate();
                     }
                     break;
@@ -643,34 +674,46 @@ document.addEventListener('keydown', function (event) {
                     }
                     break;
                 case 2:     //space in enemy selection
-                    if (boss[enemy_select].hp > 50){
-                        boss[enemy_select].hp -= 50;
-                        boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 10px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
-                        boss[enemy_select].div.innerHTML = boss[enemy_select].hp + " / " + boss[enemy_select].maxhp;
-                        if(boss[enemy_select].effect != -1) {
-                            if (party[boss[enemy_select].effect].hp > 0) {
-                                party[boss[enemy_select].effect].usable = true;
-                            }
-                            boss[enemy_select].div.style.background = black;
-                            boss[enemy_select].effect = -1;
-                        }
-                    } else {
-                        document.getElementById(boss[enemy_select].name).remove();
-                        boss.splice(enemy_select, 1);
-                        enemy_select = 0;
-                        if (boss.length == 0) {
-                            state = 0;
-                            weekOfJouney++;
-                            dayOfJourney = 1;
-                            createManagementPanel();
-                            updateManagementPanel();
-                        } else {
+                    desc_panel.innerHTML = "";
+                    if (boss[enemy_select].shield == false) {
+                        if (boss[enemy_select].hp > ongoing.effect * party[party.length - turns].boost){
+                            boss[enemy_select].hp -= ongoing.effect * party[party.length - turns].boost;
                             boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 0px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
                             boss[enemy_select].div.innerHTML = "";
+                            if(boss[enemy_select].effect != -1) {
+                                if (party[boss[enemy_select].effect].hp > 0) {
+                                    party[boss[enemy_select].effect].usable = true;
+                                    if (boss[enemy_select].effect > who) turns++;
+                                }
+                                console.log(boss[enemy_select]);
+                                boss[enemy_select].div.style.background = "black";
+                                boss[enemy_select].effect = -1;
+                            }
+                        } else {
+                            document.getElementById(boss[enemy_select].name).remove();
+                            if (boss[enemy_select].effect != -1 && party[boss[enemy_select].effect].hp > 0) {
+                                party[boss[enemy_select].effect].usable = true;
+                                if (boss[enemy_select].effect > who) turns++;
+                            }
+                            boss.splice(enemy_select, 1);
+                            enemy_select = 0;
+                            if (boss.length == 0) {
+                                state = 0;
+                                weekOfJouney++;
+                                dayOfJourney = 1;
+                                createManagementPanel();
+                                updateManagementPanel();
+                            } else {
+                                boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 0px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
+                                boss[enemy_select].div.innerHTML = "";
+                            }
                         }
+                    } else {
+                        boss[enemy_select].shield = false;
+                        boss[2].div.style.background = "black";
                     }
                     turns -= 1;
-                    if(turns == 0) {
+                    if(turns <= 0) {
                         turns = boss.length;
                         who = 0;
                         while(party[who].usable == false) who++;
@@ -680,18 +723,17 @@ document.addEventListener('keydown', function (event) {
                         who++;
                         while(party[who].usable == false) who++;
                     }
-                    console.log("turns: " + turns);
                     partyUpdate();
                     state = 1;
                     select_x = 1;
                     break;
                 case 1:
                     if (select_x == 1) {        //space in combat menu
-                        switch(skill_arr[party[select_y].skills[skill_select]].type) {
+                        ongoing = skill_arr[party[who].skills[skill_select]];
+                        switch(skill_arr[party[who].skills[skill_select]].type) {
                             case "dmg":
                                 boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 10px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
-                                boss[enemy_select].div.innerHTML = boss[enemy_select].hp + " / " + boss[enemy_select].maxhp;
-                                ongoing = party[select_y].skills[i];
+                                boss[enemy_select].div.innerHTML = boss[enemy_select].hp + " / " + boss[enemy_select].maxhp + "<br>";
                                 state = 2;
                                 break;
                             case "hel":
@@ -769,18 +811,20 @@ document.addEventListener('keydown', function (event) {
                 case 7:
                     switch(type) {
                         case "hel":
-                            if(party[select_y].hp + 30 >= party[select_y].maxhp) party[select_y].hp = party[select_y].maxhp;
-                            else party[select_y].hp += 30;
+                            if(party[select_y].hp + ongoing.effect >= party[select_y].maxhp) party[select_y].hp = party[select_y].maxhp;
+                            else party[select_y].hp += ongoing.effect;
                             break;
                         case "def":
                             party[select_y].protected = true;
                             break;
+                        case "amp":
+                            party[select_y].boost *= ongoing.effect;
                     }
+                    desc_panel.innerHTML = "";
                     party[select_y].name = party[select_y].org_name
                     state = 1;
                     turns--;
-                    console.log("turns: " + turns);
-                    if(turns == 0) {
+                    if(turns <= 0) {
                         turns = boss.length;
                         who = 0;
                         while(party[who].usable == false) who++;
@@ -792,6 +836,9 @@ document.addEventListener('keydown', function (event) {
                     }
                     partyUpdate();
             }
+        } else if (event.keyCode == 49) {
+            state = 1;
+            boss1();
         }
     }
 });
