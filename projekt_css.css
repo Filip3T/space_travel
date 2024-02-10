@@ -20,7 +20,7 @@ body {line-height: 5vh;}
 }
 #management-fade {
     width: 10vw;
-    height: 100vh;
+    height: 75vh;
     top: 0px;
     background: linear-gradient(to right, rgba(6, 6, 12, 0.5), transparent);
 }
@@ -61,6 +61,7 @@ body {line-height: 5vh;}
     height: 70px;
     width: 370px;
     font-size: 40px;
+    top: 65vh;
     text-align: right;
 }
 #combat-panel {
@@ -107,4 +108,38 @@ body {line-height: 5vh;}
     text-align: center;
     font-size: 3vw;
     margin: 2vh;
+}
+
+#management-desc {
+    left: 40vw;
+    width: 56vw;
+    background-color: rgba(6, 6, 12, 0.5);
+    height: 25vh;
+    top: 75vh;
+    color: rgb(107, 87, 70);
+    text-align: center;
+    font-size: 1.8vw;
+    padding: 2vw;
+}
+
+#desc-fade {
+    width: 60vw;
+    height: 10vh;
+    top: 65vh;
+    left: 40vw;
+    background: linear-gradient(to top, rgba(6, 6, 12, 0.5), transparent);
+}
+
+#message {
+    width: 100vw;
+    height: 100vh;
+    left: 0px;
+    top: 0px;
+    background-color: transparent;
+    color: transparent;
+    font-size: 2vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 2000ms linear, color 1000ms linear;
 }

@@ -1,7 +1,7 @@
 //creating a party
 
 var party = [];             // array of party members
-var state = 0;              // 0 - management    1 - combat_skill_select    2 - combat_enemy_select    3 - story    5 - store   6 - allies  7 - health and amp selection
+var state = 0;              // 0 - management    1 - combat_skill_select    2 - combat_enemy_select    3 - story    5 - store   6 - allies  7 - health and amp selection    8 - message
 var select_x = 1;           // select on x axis
 var select_y = 1;           // select on y axis (it's easier this way)
 
@@ -12,6 +12,8 @@ var weekOfJouney = 0;
 var bars = ["stan statku", "morale", "paliwo", "racje"];
 var buttons = ["napraw", "kup", "pracuj", "wolne"];
 var ship = [1000,750,500,500,2000];
+
+var desc_message = ""
 
 function createManagementPanel() {
     if (panel != null) {
@@ -97,12 +99,19 @@ function createManagementPanel() {
     button.style.top = window.innerHeight * 0.85 + "px";
     button.style.marginLeft = "0px";
 
-
     textBox.appendChild(button);
-    
+
+    let management_desc = document.createElement("div");
+    management_desc.id = "management-desc";
+    document.getElementById('main').appendChild(management_desc);
+
+    let desc_fade = document.createElement("div");
+    desc_fade.id = "desc-fade";
+    document.getElementById('main').appendChild(desc_fade)
+
+
     let money = document.createElement('div');
     money.style.left = window.innerWidth - 400 + "px";
-    money.style.top = window.innerHeight - 70 + "px";
     money.id = "money";
     money.innerHTML = ship[4] + "$";
 
@@ -141,6 +150,7 @@ function updateManagementPanel() {
         }
     } 
     document.getElementById('money').innerHTML = ship[4] + "$";
+    document.getElementById('management-desc').innerHTML = desc_message;
 } //updateManagementPanel
 updateManagementPanel();
 
@@ -161,6 +171,8 @@ function createStoreMenu() {
         panel.appendChild(button);
         state = 5;
     }
+    desc_message = "Co mógłbym kupić?"
+    updateManagementPanel();
 }
 
 function ally(name, hp, skills, id, price, desc) {
@@ -199,7 +211,8 @@ function createCombatPanel() {    //creating a panel for combat choices
     if (panel != null) {
         panel.remove();
     }
-    
+    document.getElementById("management-desc").remove();
+    document.getElementById("desc-fade").remove();
     document.getElementById("money").remove();
 
     document.getElementById("management-fade").remove();
@@ -269,24 +282,24 @@ function partyUpdate() {    //updating party members
     }
     skill_panel.innerHTML = "Skills:<br>";
     for(i=0;i<party[who].skills.length;i++) {
-        if (skill_select == i && select_x == 1) {
-            if (turn) {
+        if (skill_select == i) {
                 skill_panel.innerHTML += "<span style='color: rgb(197, 173, 137);'>" + skill_arr[party[who].skills[i]].name + "</span>";
-                switch (skill_arr[party[who].skills[i]].type) { //dmg - atak  hel - zdrowie   def - tarcza    amp - dmg boost
-                    case "dmg":
-                        desc_panel.innerHTML = "Zadaje " + skill_arr[party[who].skills[i]].effect * party[who].boost + " punktów obrażeń wybranemu przeciwnikowi.";
-                        break;
-                    case "hel":
-                        desc_panel.innerHTML = "Leczy wybranego towarzysza o " + skill_arr[party[who].skills[i]].effect + " punktów zdrowia.";
-                        break;
-                    case "amp":
-                        desc_panel.innerHTML = "Wzmacnia ataki danego towarzysza x" + skill_arr[party[who].skills[i]].effect + " do końca tury gracza.";
-                        break;
-                    case "def":
-                        desc_panel.innerHTML = "Nadaje tarcze na wybrango towarzysza.";
-                        break;
+                if (turn) {
+                    switch (skill_arr[party[who].skills[i]].type) { //dmg - atak  hel - zdrowie   def - tarcza    amp - dmg boost
+                        case "dmg":
+                            desc_panel.innerHTML = "Zadaje " + skill_arr[party[who].skills[i]].effect * party[who].boost + " punktów obrażeń wybranemu przeciwnikowi.";
+                            break;
+                        case "hel":
+                            desc_panel.innerHTML = "Leczy wybranego towarzysza o " + skill_arr[party[who].skills[i]].effect + " punktów zdrowia.";
+                            break;
+                        case "amp":
+                            desc_panel.innerHTML = "Wzmacnia ataki danego towarzysza x" + skill_arr[party[who].skills[i]].effect + " do końca tury gracza.";
+                            break;
+                        case "def":
+                            desc_panel.innerHTML = "Nadaje tarcze na wybrango towarzysza.";
+                            break;
+                    }
                 }
-            }
         } else {
             skill_panel.innerHTML += skill_arr[party[who].skills[i]].name;
         }
@@ -307,13 +320,6 @@ function partyUpdate() {    //updating party members
     }
 } //partyUpdate
 //partyUpdate();
-
-function massage(state, massage = "") {
-    let fade = document.getElementById('fade');
-    if (state) fade.style.backgroundColor = "black";
-    else fade.style.backgroundColor = "transparent";
-    fade.innerHTML = massage;
-}
 
 function limb(name, hp, x, y) {
     this.name = name;
@@ -344,14 +350,6 @@ function limb(name, hp, x, y) {
 var boss;
 var boss_skills;
 
-function test() {
-    let limb1 = new limb("lewa reka", 100, 100, 100);
-    let limb2 = new limb("prawa reka", 100, 400, 100);
-    let limb3 = new limb("lewa noga", 100, 700, 100);
-    let limb4 = new limb("prawa noga", 100, 1000, 100);
-    boss = [limb1, limb2, limb3, limb4];
-}
-
 function boss1() {
     createCombatPanel()
     partyUpdate()
@@ -362,6 +360,14 @@ function boss1() {
     let limb5 = new limb("druga reka", 100, 80, 20);
     boss = [limb1, limb2, limb3, limb4, limb5];
     boss_skills = ["cios", "lap", "tarcza"];
+}
+
+function boss0() {
+    createCombatPanel()
+    partyUpdate()
+    mannequin = new limb("manekin", 400, 50, 50);
+    boss = [mannequin];
+    boss_skills = ["nic"];
 }
 
 var ally_store_list = []
@@ -401,6 +407,8 @@ function createAllyStoreMenu() {
 
         ally_store.appendChild(button);  
     }
+    desc_message = "Pomoc może się przydać";
+    updateManagementPanel();
 }
 
 function nextDay() {
@@ -455,7 +463,14 @@ function nextDay() {
         if (dayOfJourney == 8) {
             select_x = 1;
             state = 1;
-            boss1();
+            switch(weekOfJouney) {
+                case 0:
+                    boss0();
+                    break;
+                case 1:
+                    boss1();
+                    break;
+            }
         }
     }, 2000);
     setTimeout(() => {
@@ -463,6 +478,8 @@ function nextDay() {
         turn = true;
     }, 3000);
 }
+
+
 
 function enemyTurn() {
     for(i=0;i<party.length;i++) {
@@ -492,25 +509,47 @@ function enemyTurn() {
                 } else if (party[target].usable == false) {
                     desc_panel.innerHTML = boss[boss.length - turns].name + " stara sie złapać jednego z twoich towarzyszy ale byl on juz zlapany<br>"
                 } else {
-                    party[target].usable = false;
-                    desc_panel.innerHTML = boss[boss.length - turns].name + " stara sie złapać jednego z twoich towarzyszy.<br>" +
-                    party[target].name + " zostaje złapany.";
-                    boss[boss.length - turns].effect = target;
-                    boss[boss.length - turns].div.style.background = "rgb(153, 51, 51)";
+                    if (boss[boss.length - turns].effect != -1) {
+                        desc_panel.innerHTML = boss[boss.length - turns].name + " wypuszcza " + party[boss[boss.length - turns].effect].name + "a i łapie" +
+                        party[target].name;
+                        party[boss[boss.length - turns].effect].usable = true;
+                        party[target] = false;
+                    } else {
+                        party[target].usable = false;
+                        desc_panel.innerHTML = boss[boss.length - turns].name + " stara sie złapać jednego z twoich towarzyszy.<br>" +
+                        party[target].name + " zostaje złapany.";
+                        boss[boss.length - turns].effect = target;
+                        boss[boss.length - turns].div.style.background = "rgb(153, 51, 51)";
+                    }
                 }
                 break;
             case "tarcza":
                 boss[2].shield = true;
-                if (boss[2].hp + 40 > boss[2].maxhp) boss[2].hp = boss[2].maxhp;
-                else boss[2].hp += 50;
+                if (boss[2].hp + 15 > boss[2].maxhp) boss[2].hp = boss[2].maxhp;
+                else boss[2].hp += 15;
                 boss[2].div.style.background = "cyan";
                 desc_panel.innerHTML = boss[boss.length - turns].name + " tworzy tarcze i leczy wielkie oko."
                 break;
+            case "nic":
+                switch(Math.round(Math.random() * 3)) {
+                    case 0:
+                        desc_panel.innerHTML = "Manekin gapi się w nicość. Myśli nad sensem istnienia.";
+                        break;
+                    case 1:
+                        desc_panel.innerHTML = "Manekin gapi się w nicość. Zastanawia się nad tym co dzisiaj na obiad.";
+                        break;
+                    case 2:
+                        desc_panel.innerHTML = "Manekin gapi się w nicość. Jego oczka wpatrzone są w napastników.";
+                        break;
+                    case 3:
+                        desc_panel.innerHTML = "Manekin gapi się w nicość. Stara wzbodzić sie twoją litość.";
+                }
         }
         partyUpdate();
         setTimeout(() => {
             desc_panel.innerHTML = "";
             turns--;
+            console.log("reset:" + turns)
             enemyTurn();  
         }, 5000);
     } else {
@@ -523,6 +562,46 @@ function enemyTurn() {
     while(party[who].usable == false) who++;
     partyUpdate();
 }
+
+var message_box = document.createElement("div");
+message_box.id = "message";
+document.body.appendChild(message_box);
+
+function message(text) {
+    message_box.style.color = "white";
+    message_box.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+    message_box.innerHTML = text;
+}
+
+function management_buttons_desc(select) {
+    switch(select) {
+        case 0:
+            desc_message = "Czy naprawić statek?<br>Przez dodatkowy wysiłek załoga może stracić motywacje do pracy.";
+            break;
+        case 1:
+            desc_message = "Kupić coś?";
+            break;
+        case 2:
+            desc_message = "Czy nakazać nadgodziny? Mogę zyskać więcej pieniędzy, ale załoga może mnie znienawidzić.";
+            break;
+        case 3:
+            desc_message = "Czy zarządzić wolne? Mogę podnieść morale załogi, ale strace dochody za ten dzień.";
+            break;
+    }
+    updateManagementPanel();
+}
+
+var message_start = ["Jesteście kosmicznymi piratami.", false, "Ostatnio ograbiliście kapliczke nieznanego bożka na dalece oddalonej primytywnej planecie.", false,
+                     "Miesiąc od tamtego dnia w twoim sercu pojawia się złowrogie przeczucie.", false, "Słyszysz w głowie głos bożka mówiący że musisz zwrócić bezprawnie skradzione bogactwa.", false,
+                     "Głos w wypadku niespełnienia żądań zapowiedział swój powrót za tydzień", false, "Postanawiasz wrócić na opuszczoną planete i zwrócić złoto", false,
+                     "Przed tobą daleka podróż", true];
+var message_start_i = 0;
+
+function start() {
+    message(message_start[message_start_i])
+}
+start();
+state = 8;
 
 var ongoing; //stores used skill when chosing target
 var enemy_select = 0; //stores selected enemy
@@ -540,6 +619,7 @@ document.addEventListener('keydown', function (event) {
                         document.getElementById("button-" + select_x).style.border = "5px solid rgb(107, 87, 70)";
                         select_x += 1;
                         document.getElementById("button-" + select_x).style.border = "5px solid rgb(197, 173, 137)";
+                        management_buttons_desc(select_x)
                     } 
                     break;
                 case 2: // right in enemy select
@@ -564,10 +644,15 @@ document.addEventListener('keydown', function (event) {
                         select_y = 1;
                         document.getElementById("button-" + select_x).style.border = "5px solid rgb(107, 87, 70)";
                         document.getElementById("next_day").style.border = "5px solid rgb(197, 173, 137)";
+                        desc_message = "Zaczekać do następnego dnia?<br>Dzięki pracy załogi zyskam trochę gotówki.";
+                        updateManagementPanel();
                     }
                     break;
                 case 1:     //down in combat menu
-                    if (skill_select < party[select_y].skills.length - 1) skill_select += 1;
+                    if (skill_select < party[who].skills.length - 1) skill_select += 1;
+                    console.log(party);
+                    console.log("skill: " + skill_select);
+                    console.log("y:     " + who);
                     partyUpdate();
                     break;
                 case 5:
@@ -596,6 +681,7 @@ document.addEventListener('keydown', function (event) {
                         document.getElementById("button-" + select_x).style.border = "5px solid rgb(107, 87, 70)";
                         select_x -= 1;
                         document.getElementById("button-" + select_x).style.border = "5px solid rgb(197, 173, 137)";
+                        management_buttons_desc(select_x);
                     }
                     break;
                 case 2:     //left in enemy selection
@@ -621,6 +707,7 @@ document.addEventListener('keydown', function (event) {
                         select_y = 0;
                         document.getElementById("button-" + select_x).style.border = "5px solid rgb(197, 173, 137)"; 
                         document.getElementById("next_day").style.border = "5px solid rgb(107, 87, 70)";
+                        management_buttons_desc(select_x);
                     }
                     break;
                 case 1:     //up in combat menu
@@ -724,6 +811,7 @@ document.addEventListener('keydown', function (event) {
                         while(party[who].usable == false) who++;
                     }
                     partyUpdate();
+                    skill_select = 0;
                     state = 1;
                     select_x = 1;
                     break;
@@ -787,6 +875,8 @@ document.addEventListener('keydown', function (event) {
                             state = 0;
                             createManagementPanel();
                             select_y = 1;
+                            desc_message = "Zaczekać do następnego dnia?<br>Dzięki pracy załogi zyskam trochę gotówki.";
+                            updateManagementPanel();
                             break;
                     }
                     document.getElementById("money").innerHTML = ship[4] + "$";
@@ -820,6 +910,7 @@ document.addEventListener('keydown', function (event) {
                         case "amp":
                             party[select_y].boost *= ongoing.effect;
                     }
+                    skill_select = 0;
                     desc_panel.innerHTML = "";
                     party[select_y].name = party[select_y].org_name
                     state = 1;
@@ -835,10 +926,20 @@ document.addEventListener('keydown', function (event) {
                         while(party[who].usable == false) who++;
                     }
                     partyUpdate();
+                    break;
+                case 8:
+                    if(!message_start[message_start_i+1]) {
+                        message_start_i += 2;
+                        start();
+                    } else {
+                        state = 0;
+                        message_box.style.backgroundColor = "transparent";
+                        message_box.style.color = "transparent";
+                    }
             }
         } else if (event.keyCode == 49) {
             state = 1;
-            boss1();
+            boss0();
         }
     }
 });
