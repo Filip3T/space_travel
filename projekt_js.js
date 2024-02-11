@@ -9,6 +9,9 @@ var panel;
 var dayOfJourney = 1;
 var weekOfJouney = 0;
 
+var hp_panel = document.createElement("div")
+hp_panel.id = "hp";
+
 var bars = ["stan statku", "morale", "paliwo", "racje"];
 var buttons = ["napraw", "kup", "pracuj", "wolne"];
 var ship = [1000,750,500,500,2000];
@@ -111,7 +114,6 @@ function createManagementPanel() {
 
 
     let money = document.createElement('div');
-    money.style.left = window.innerWidth - 400 + "px";
     money.id = "money";
     money.innerHTML = ship[4] + "$";
 
@@ -321,24 +323,29 @@ function partyUpdate() {    //updating party members
 } //partyUpdate
 //partyUpdate();
 
-function limb(name, hp, x, y) {
+function limb(name, hp, x, y, image = "",  size_x = "100px" ,size_y = "100px", s_image = "") {
     this.name = name;
     this.hp = hp;
     this.maxhp = hp;
     this.shield = false;
+    this.image = image;
+    this.s_image = s_image;
 
     var graphic = document.createElement("div");
     graphic.id = name;
-    graphic.style.background = "black";
-    graphic.style.width = "100px";
+    if (image == "") graphic.style.background = "black";
+    graphic.style.width = size_x;
     graphic.style.color = "white";
     graphic.style.display = "flex";
     graphic.style.alignItems = "center";
     graphic.style.justifyContent = "center";
-    graphic.style.height = "100px";
+    graphic.style.height = size_y;
     graphic.style.position = "absolute";
+    graphic.style.backgroundSize = size_x + " " + size_y;
     graphic.style.left = x+"vw";
     graphic.style.top = y/2+"vh";
+    graphic.style.backgroundImage = "url('" + image + "')";
+    graphic.style.zIndex = "20";
 
     this.effect = -1;
 
@@ -351,21 +358,31 @@ var boss;
 var boss_skills;
 
 function boss1() {
-    createCombatPanel()
-    partyUpdate()
-    let limb1 = new limb("trzecia reka", 100, 10, 70);
-    let limb2 = new limb("pierwsza reka", 100, 20, 10);
-    let limb3 = new limb("oko", 250, 50, 50);
-    let limb4 = new limb("czwarta reka", 100, 70, 60);
-    let limb5 = new limb("druga reka", 100, 80, 20);
-    boss = [limb1, limb2, limb3, limb4, limb5];
-    boss_skills = ["cios", "lap", "tarcza"];
+    document.body.style.backgroundImage = "url('images/ship_bg.png')";
+    createCombatPanel();
+    partyUpdate();
+    let body = document.createElement("div");
+    body.style.backgroundImage = "url('images/boss1/body.png')";
+    body.style.width = "100vw";
+    body.style.height = "100vh";
+    body.style.zIndex = "20";
+    body.style.backgroundSize = "100vw 100vh";
+    document.getElementById("main").appendChild(body);
+    document.getElementById("main").appendChild(hp_panel);
+    let limb1 = new limb("pierwsza reka", 100, 0, 0, "images/boss1/hand1.png", "100vw", "100vh" , "images/boss1/hand1g.png");
+    let limb2 = new limb("druga reka", 100, 0, 0, "images/boss1/hand2.png", "100vw", "100vh", "images/boss1/hand2g.png");
+    let limb3 = new limb("glowa", 250, 0, 0, "images/boss1/head.png", "100vw", "100vh");
+    let limb4 = new limb("trzecia reka", 100, 0, 0, "images/boss1/hand3.png", "100vw", "100vh", "images/boss1/hand3g.png");
+    boss = [limb1, limb4, limb3, limb2];
+    boss_skills = ["cios",  "tarcza", "lap"];
 }
 
 function boss0() {
-    createCombatPanel()
-    partyUpdate()
-    mannequin = new limb("manekin", 400, 50, 50);
+    document.body.style.backgroundImage = "url('images/ship_bg.png')";
+    createCombatPanel();
+    partyUpdate();
+    document.getElementById("main").appendChild(hp_panel);
+    mannequin = new limb("manekin", 400, 42, 45 , "images/dummy.png", "15vw" , "55vh");
     boss = [mannequin];
     boss_skills = ["nic"];
 }
@@ -418,7 +435,7 @@ function nextDay() {
 
     dayOfJourney+=1;
     if(dayOfJourney != 8) fade.innerHTML = "DZIEŃ " + (dayOfJourney + weekOfJouney * 7);
-    else fade.innerHTML = "WE ŚNIE";
+    else fade.innerHTML = "W NOCY";
 
     setTimeout(() => {
         fade.style.backgroundColor = "transparent";
@@ -426,14 +443,14 @@ function nextDay() {
         ship[2] -= 200;
         ship[3] -= 150;
         let event = Math.round(Math.random() * 100);
-        if(event > 50 && event <= 60) {
-            panel.innerHTML = "<p style='font-size:40px;'>Okradziono nas!!!<br>Stracilismy troche paliwa i racji zywnosciowych!</p>";
+        if(event > 50 && event <= 60 && dayOfJourney != 7) {
+            panel.innerHTML = "<p style='font-size:40px; text-align: center;'>Okradziono nas!!!<br>Stracilismy troche paliwa i racji zywnosciowych!</p>";
             state = 3;
             ship[1] -= 150;
             ship[2] -= 200;
             ship[3] -= 100;
-        } else if (event > 60 && event <= 70) {
-            panel.innerHTML = "<p style='font-size:40px;'>Uderzlismy w asteroide!!!<br>Nasz statek jest w oplakanym stanie!!!</p>";
+        } else if (event > 60 && event <= 70 && dayOfJourney != 7) {
+            panel.innerHTML = "<p style='font-size:40px; text-align: center;'>Uderzlismy w asteroide!!!<br>Nasz statek jest w oplakanym stanie!!!</p>";
             ship[0] -= 300;
             state = 3;
         }
@@ -458,7 +475,10 @@ function nextDay() {
             }
         }   
         if (dayOfJourney == 7) {
-            document.getElementById("next_day").innerHTML = "Zaśnij";
+            document.getElementById("next_day").innerHTML = "Zaczekaj do nocy";
+            message_start_i += 2;
+            start()
+            state = 8;
         }
         if (dayOfJourney == 8) {
             select_x = 1;
@@ -488,7 +508,9 @@ function enemyTurn() {
     if(turns > 0) {
         turn = false;
         let target = Math.round(Math.random() * (party.length - 1));
-        let ability =  boss_skills[Math.round(Math.random() * (boss_skills.length - 1))];
+        let ability = 0;
+        if (boss[boss.length - turns].name != "glowa") ability =  boss_skills[Math.round(Math.random() * (boss_skills.length - 1))];
+        else ability =  boss_skills[Math.round(Math.random() * (boss_skills.length - 2))];
         switch(ability) {
             case "cios":
                 if (party[target].protected == true) {
@@ -519,16 +541,19 @@ function enemyTurn() {
                         desc_panel.innerHTML = boss[boss.length - turns].name + " stara sie złapać jednego z twoich towarzyszy.<br>" +
                         party[target].name + " zostaje złapany.";
                         boss[boss.length - turns].effect = target;
-                        boss[boss.length - turns].div.style.background = "rgb(153, 51, 51)";
+                        boss[boss.length - turns].div.style.backgroundImage = "url('" +  boss[boss.length - turns].s_image + "')";
                     }
                 }
                 break;
             case "tarcza":
+                let head = "";
+                for(i=0;i<boss.length;i++) {
+
+                }
                 boss[2].shield = true;
                 if (boss[2].hp + 15 > boss[2].maxhp) boss[2].hp = boss[2].maxhp;
                 else boss[2].hp += 15;
-                boss[2].div.style.background = "cyan";
-                desc_panel.innerHTML = boss[boss.length - turns].name + " tworzy tarcze i leczy wielkie oko."
+                desc_panel.innerHTML = boss[boss.length - turns].name + " tworzy tarcze i leczy glowe potwora."
                 break;
             case "nic":
                 switch(Math.round(Math.random() * 3)) {
@@ -542,7 +567,7 @@ function enemyTurn() {
                         desc_panel.innerHTML = "Manekin gapi się w nicość. Jego oczka wpatrzone są w napastników.";
                         break;
                     case 3:
-                        desc_panel.innerHTML = "Manekin gapi się w nicość. Stara wzbodzić sie twoją litość.";
+                        desc_panel.innerHTML = "Manekin gapi się w nicość. Stara wzbudzić sie twoją litość.";
                 }
         }
         partyUpdate();
@@ -594,7 +619,9 @@ function management_buttons_desc(select) {
 var message_start = ["Jesteście kosmicznymi piratami.", false, "Ostatnio ograbiliście kapliczke nieznanego bożka na dalece oddalonej primytywnej planecie.", false,
                      "Miesiąc od tamtego dnia w twoim sercu pojawia się złowrogie przeczucie.", false, "Słyszysz w głowie głos bożka mówiący że musisz zwrócić bezprawnie skradzione bogactwa.", false,
                      "Głos w wypadku niespełnienia żądań zapowiedział swój powrót za tydzień", false, "Postanawiasz wrócić na opuszczoną planete i zwrócić złoto", false,
-                     "Przed tobą daleka podróż", true];
+                     "Przed tobą daleka podróż", true, "Głos wraca.", false, "Bożek przklina cie twierdząc że jeżeli bogactwa nie zostaną zwrócone<br> za tydzień pośle na wasz statek straszliwą bestie", false,
+                     "Masz siedem dni", false, "Aby dolecieć do planety skąd ukradłeś złoto potrzbujesz jeszcze dwóch tygodni", false, "Wiedząc że walka z bestią jest nieunikniona postanwiasz potrenować na kukle", true,
+                     "Uważasz że jesteś gotów", false, "Masz 7 dni", true, "Dzisiaj w nocy pojawić ma sie bestia", false, "Nie będe dzisiaj spał", true];
 var message_start_i = 0;
 
 function start() {
@@ -626,9 +653,9 @@ document.addEventListener('keydown', function (event) {
                     if (boss.length > 1) {
                         if (enemy_select < boss.length - 1) enemy_select += 1;
                         boss[enemy_select-1].div.style.filter = "drop-shadow(0px 0px 0px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
-                        boss[enemy_select-1].div.innerHTML = "";
+                        hp_panel.innerHTML = "";
                         boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 10px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
-                        boss[enemy_select].div.innerHTML = boss[enemy_select].hp + " / " + boss[enemy_select].maxhp + "<br>";
+                        hp_panel.innerHTML = boss[enemy_select].hp + " / " + boss[enemy_select].maxhp + "<br>";
                         partyUpdate();
                     }
                     break;
@@ -684,13 +711,13 @@ document.addEventListener('keydown', function (event) {
                         management_buttons_desc(select_x);
                     }
                     break;
-                case 2:     //left in enemy selection
+                case 2:     //left in enemy selection -----------------------------------------------------------------------------------------------------------------
                     if(boss.length > 1) {
                         if (enemy_select != 0) enemy_select -= 1;
                         boss[enemy_select+1].div.style.filter = "drop-shadow(0px 0px 0px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
-                        boss[enemy_select+1].div.innerHTML = "";
+                        hp_panel.innerHTML = "";
                         boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 10px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
-                        boss[enemy_select].div.innerHTML = boss[enemy_select].hp + " / " + boss[enemy_select].maxhp + "<br>";
+                        hp_panel.innerHTML = boss[enemy_select].hp + " / " + boss[enemy_select].maxhp + "<br>";
                         partyUpdate();
                     }
                     break;
@@ -763,17 +790,17 @@ document.addEventListener('keydown', function (event) {
                 case 2:     //space in enemy selection
                     desc_panel.innerHTML = "";
                     if (boss[enemy_select].shield == false) {
-                        if (boss[enemy_select].hp > ongoing.effect * party[party.length - turns].boost){
-                            boss[enemy_select].hp -= ongoing.effect * party[party.length - turns].boost;
+                        if (boss[enemy_select].hp > Math.round(ongoing.effect * party[party.length - turns].boost)){
+                            boss[enemy_select].hp -= Math.round(ongoing.effect * party[party.length - turns].boost);
                             boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 0px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
-                            boss[enemy_select].div.innerHTML = "";
+                            hp_panel.innerHTML = "";
                             if(boss[enemy_select].effect != -1) {
                                 if (party[boss[enemy_select].effect].hp > 0) {
                                     party[boss[enemy_select].effect].usable = true;
                                     if (boss[enemy_select].effect > who) turns++;
                                 }
                                 console.log(boss[enemy_select]);
-                                boss[enemy_select].div.style.background = "black";
+                                boss[enemy_select].div.style.backgroundImage = "url('" + boss[enemy_select].image + "')";
                                 boss[enemy_select].effect = -1;
                             }
                         } else {
@@ -785,14 +812,19 @@ document.addEventListener('keydown', function (event) {
                             boss.splice(enemy_select, 1);
                             enemy_select = 0;
                             if (boss.length == 0) {
-                                state = 0;
+                                document.body.style.backgroundImage = "url('images/background.png')";
+                                message_start_i += 2;
+                                state = 8;
+                                start();
                                 weekOfJouney++;
                                 dayOfJourney = 1;
+                                select_x = 0;
+                                select_y = 0;
                                 createManagementPanel();
                                 updateManagementPanel();
                             } else {
                                 boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 0px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
-                                boss[enemy_select].div.innerHTML = "";
+                                hp_panel.innerHTML = "";
                             }
                         }
                     } else {
@@ -812,7 +844,7 @@ document.addEventListener('keydown', function (event) {
                     }
                     partyUpdate();
                     skill_select = 0;
-                    state = 1;
+                    if(state != 8) state = 1;
                     select_x = 1;
                     break;
                 case 1:
@@ -821,7 +853,7 @@ document.addEventListener('keydown', function (event) {
                         switch(skill_arr[party[who].skills[skill_select]].type) {
                             case "dmg":
                                 boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 10px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
-                                boss[enemy_select].div.innerHTML = boss[enemy_select].hp + " / " + boss[enemy_select].maxhp + "<br>";
+                                hp_panel.innerHTML = boss[enemy_select].hp + " / " + boss[enemy_select].maxhp + "<br>";
                                 state = 2;
                                 break;
                             case "hel":
@@ -935,11 +967,12 @@ document.addEventListener('keydown', function (event) {
                         state = 0;
                         message_box.style.backgroundColor = "transparent";
                         message_box.style.color = "transparent";
+                        updateManagementPanel();
                     }
             }
         } else if (event.keyCode == 49) {
             state = 1;
-            boss0();
+            boss1();
         }
     }
 });
