@@ -23,6 +23,7 @@ function createManagementPanel() {
         panel.innerHTML = "";
     }
     main.innerHTML = "";
+
     panel = document.createElement("div");
     let fade = document.createElement("div");
     panel.id = "management-panel"
@@ -217,10 +218,11 @@ var skill_panel;
 var desc_panel;
 
 function createCombatPanel() {    //creating a panel for combat choices
+    console.log("created")
     if (panel != null) {
         panel.remove();
     }
-    if (state == 0) {
+    if (state != 9) {
         document.getElementById("management-desc").remove();
         document.getElementById("desc-fade").remove();
         document.getElementById("money").remove();
@@ -367,6 +369,7 @@ var boss;
 var boss_skills;
 
 function boss2() {
+    document.body.style.backgroundImage = "url('images/background.png')";
     createCombatPanel();
     partyUpdate();
     let god = new limb("god", 99999, ((window.innerWidth / 2) - window.innerHeight / 2), 0, "images/god.png", "100vh", "100vh", "", true);
@@ -1066,13 +1069,17 @@ document.addEventListener('keydown', function (event) {
                         setTimeout(() => {
                             message_box.style.backgroundColor = "transparent";
                             message_box.style.color = "transparent";
-                            createCombatPanel();
-                            partyUpdate();
+                        }, 3000);
+                            state = 9;
                             boss2();
                             state = 1; 
-                        }, 3000);
                     }
             }
+        } else if (event.keyCode == 49) {
+            weekOfJouney = 2;
+            dayOfJourney = 6;
+            createManagementPanel();
+            updateManagementPanel();
         }
     }
 });
