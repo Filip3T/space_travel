@@ -16,7 +16,7 @@ var bars = ["stan statku", "morale", "paliwo", "racje"];
 var buttons = ["napraw", "kup", "pracuj", "wolne"];
 var ship = [1000,750,500,500,2000];
 
-var desc_message = ""
+var desc_message = "Zaczekać do następnego dnia?<br>Dzięki pracy załogi zyskam trochę gotówki."
 
 function createManagementPanel() {
     if (panel != null) {
@@ -123,19 +123,23 @@ function createManagementPanel() {
 createManagementPanel();
 
 function updateManagementPanel() {
- /*    if(ship[0] <= 0) {
-        panel.innerHTML = "STATEK ZOSTAL ZNISZCZONY!!! KONIEC!!!";
+    if(ship[0] <= 0) {
+        fade.style.backgroundColor = "black";
+        fade.innerHTML = "Statek został zniszczony.";
         state = 4;
     } if (ship[1] <= 0) {
-        panel.innerHTML = "CALA ZALOGA CIE OPUSZCZA!!! KONIEC!!!";
+        fade.style.backgroundColor = "black";
+        fade.innerHTML = "Cała załoga odeszła.";
         state = 4;
     } if (ship[2] <= 0) {
-        panel.innerHTML = "SKONCZLYLO SIE PALIWO!!! KONIEC!!!";
+        fade.style.backgroundColor = "black";
+        fade.innerHTML = "Skończyło się paliwo.";
         state = 4;
     } if (ship[3] <= 0) {
-        panel.innerHTML = "SKONCZYLY SIE RACJE!!! KONIEC!!!";
+        fade.style.backgroundColor = "black";
+        fade.innerHTML = "Skończyły nam się racje.";
         state = 4;
-    } */
+    }
     if(ship[0] >= 1000) {
         ship[0] = 1000;
     } if (ship[1] > 1000) {
@@ -323,7 +327,7 @@ function partyUpdate() {    //updating party members
 } //partyUpdate
 //partyUpdate();
 
-function limb(name, hp, x, y, image = "",  size_x = "100px" ,size_y = "100px", s_image = "") {
+function limb(name, hp, x, y, image = "",  size_x = "100px" ,size_y = "100px", s_image = "", px = false,) {
     this.name = name;
     this.hp = hp;
     this.maxhp = hp;
@@ -342,7 +346,8 @@ function limb(name, hp, x, y, image = "",  size_x = "100px" ,size_y = "100px", s
     graphic.style.height = size_y;
     graphic.style.position = "absolute";
     graphic.style.backgroundSize = size_x + " " + size_y;
-    graphic.style.left = x+"vw";
+    if (px)  graphic.style.left = x+"px";
+    else graphic.style.left = x+"vw";
     graphic.style.top = y/2+"vh";
     graphic.style.backgroundImage = "url('" + image + "')";
     graphic.style.zIndex = "20";
@@ -356,6 +361,14 @@ function limb(name, hp, x, y, image = "",  size_x = "100px" ,size_y = "100px", s
 
 var boss;
 var boss_skills;
+
+function boss2() {
+    createCombatPanel();
+    partyUpdate();
+    let god = new limb("god", 99999, ((window.innerWidth / 2) - window.innerHeight / 2), 0, "images/god.png", "100vh", "100vh", "", true);
+    boss = [god];
+    boss_skills = ["annihilation"]
+}
 
 function boss1() {
     document.body.style.backgroundImage = "url('images/ship_bg.png')";
@@ -395,6 +408,24 @@ new ally("Uzdrowiciel", 150, [7,4], 3, 500, "opis uzdrowiciela");
 
 var ally_store_focus_x = 1;
 var ally_store_focus_y = 1;
+
+var choice = 1;
+
+function createChoice() {
+    state = 9;
+    document.getElementById("main").innerHTML = "";
+    let choices = ["tak", "-", "nie"];
+    for(i=0;i<3;i++) {
+        let option = document.createElement("div");
+        option.style.left = (window.innerWidth * 0.33 / 2 + (window.innerWidth * 0.33 * i)) - window.innerWidth * 0.04 + "px";
+        option.style.top = window.innerHeight / 2 + "px";
+        if (choice == i) option.style.color = "red";
+        else option.style.color = "gray";
+        option.style.fontSize = "4vw";
+        option.innerHTML = choices[i];
+        document.getElementById("main").appendChild(option);
+    }
+}
 
 function createAllyStoreMenu() {
     panel.innerHTML = "";
@@ -499,8 +530,6 @@ function nextDay() {
     }, 3000);
 }
 
-
-
 function enemyTurn() {
     for(i=0;i<party.length;i++) {
         party[i].boost = 1;
@@ -569,6 +598,24 @@ function enemyTurn() {
                     case 3:
                         desc_panel.innerHTML = "Manekin gapi się w nicość. Stara wzbudzić sie twoją litość.";
                 }
+                break;
+            case "annihilation":
+                turns++;
+                if (party[target].protected == true) {
+                    desc_panel.innerHTML =  "Bóg uderza w " + party[target].name + "a z siłą tysiąca słońc.<br>" + 
+                    party[target].name + " traci tarcze.";
+                    party[target].protected = false;
+                } else {
+                    party[target].hp = 0;
+                    desc_panel.innerHTML = "Bóg uderza w " + party[target].name + "a z siłą tysiąca słońc.<br>" +
+                    party[target].name + " traci życie.";
+                    party.splice(target, 1);
+                    if(party.length == 0) {
+                        fade.style.backgroundColor = "black";
+                        fade.innerHTML = "<span style='font-size: 60px;'>Człowiek nie może zabić boga.</span>";
+                        state = 4;
+                    }
+                }
         }
         partyUpdate();
         setTimeout(() => {
@@ -621,7 +668,9 @@ var message_start = ["Jesteście kosmicznymi piratami.", false, "Ostatnio ograbi
                      "Głos w wypadku niespełnienia żądań zapowiedział swój powrót za tydzień", false, "Postanawiasz wrócić na opuszczoną planete i zwrócić złoto", false,
                      "Przed tobą daleka podróż", true, "Głos wraca.", false, "Bożek przklina cie twierdząc że jeżeli bogactwa nie zostaną zwrócone<br> za tydzień pośle na wasz statek straszliwą bestie", false,
                      "Masz siedem dni", false, "Aby dolecieć do planety skąd ukradłeś złoto potrzbujesz jeszcze dwóch tygodni", false, "Wiedząc że walka z bestią jest nieunikniona postanwiasz potrenować na kukle", true,
-                     "Uważasz że jesteś gotów", false, "Masz 7 dni", true, "Dzisiaj w nocy pojawić ma sie bestia", false, "Nie będe dzisiaj spał", true];
+                     "Uważasz że jesteś gotów", false, "Masz 7 dni", true, "Dzisiaj w nocy pojawić ma sie bestia", false, "Nie będe dzisiaj spał", true, "Zabiliśmy bestie", false,
+                     "Za 7 dni dlocimy do celu", true, "Dolecoeliśmy do celu", false, "Czuje się dziwnie", false, "Pora na pożegnanie moich bogactw", false, "Czy zwrócić złoto?", true, "Oddałeś bogactwa", false,
+                     "udało ci się przeżyć", false, "KONIEC", false];
 var message_start_i = 0;
 
 function start() {
@@ -654,7 +703,8 @@ document.addEventListener('keydown', function (event) {
                         if (enemy_select < boss.length - 1) enemy_select += 1;
                         boss[enemy_select-1].div.style.filter = "drop-shadow(0px 0px 0px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
                         hp_panel.innerHTML = "";
-                        boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 10px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
+                        if (boss[enemy_select].shield == false) boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 10px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
+                        else boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 10px rgb(0, 255, 255))";
                         hp_panel.innerHTML = boss[enemy_select].hp + " / " + boss[enemy_select].maxhp + "<br>";
                         partyUpdate();
                     }
@@ -663,6 +713,9 @@ document.addEventListener('keydown', function (event) {
                     if (ally_store_focus_x < ally_store_list.length - 1) ally_store_focus_x += 1;
                     createAllyStoreMenu();
                     break;
+                case 9:
+                    if(choice != 2) choice++
+                    createChoice();
             }
         } else if (event.keyCode == 40) { // down
             switch(state) {
@@ -716,7 +769,8 @@ document.addEventListener('keydown', function (event) {
                         if (enemy_select != 0) enemy_select -= 1;
                         boss[enemy_select+1].div.style.filter = "drop-shadow(0px 0px 0px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
                         hp_panel.innerHTML = "";
-                        boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 10px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
+                        if (boss[enemy_select].shield == false) boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 10px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
+                        else boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 10px rgb(0, 255, 255))";
                         hp_panel.innerHTML = boss[enemy_select].hp + " / " + boss[enemy_select].maxhp + "<br>";
                         partyUpdate();
                     }
@@ -725,6 +779,9 @@ document.addEventListener('keydown', function (event) {
                     if (ally_store_focus_x > 1) ally_store_focus_x -= 1;
                     createAllyStoreMenu();
                     break;
+                case 9:
+                    if(choice != 0) choice--
+                    createChoice();
             }
         } else if (event.keyCode == 38) { // Up
             switch(state) {
@@ -792,7 +849,8 @@ document.addEventListener('keydown', function (event) {
                     if (boss[enemy_select].shield == false) {
                         if (boss[enemy_select].hp > Math.round(ongoing.effect * party[party.length - turns].boost)){
                             boss[enemy_select].hp -= Math.round(ongoing.effect * party[party.length - turns].boost);
-                            boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 0px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
+                            if (boss[enemy_select].shield == false) boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 10px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
+                            else boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 10px rgb(0, 255, 255))";
                             hp_panel.innerHTML = "";
                             if(boss[enemy_select].effect != -1) {
                                 if (party[boss[enemy_select].effect].hp > 0) {
@@ -816,6 +874,9 @@ document.addEventListener('keydown', function (event) {
                                 message_start_i += 2;
                                 state = 8;
                                 start();
+                                if (weekOfJouney == 1) {
+                                    
+                                }
                                 weekOfJouney++;
                                 dayOfJourney = 1;
                                 select_x = 0;
@@ -823,13 +884,13 @@ document.addEventListener('keydown', function (event) {
                                 createManagementPanel();
                                 updateManagementPanel();
                             } else {
-                                boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 0px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
+                                if (boss[enemy_select].shield == false) boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 0px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
+                                else boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 0px rgb(0, 255, 255))";
                                 hp_panel.innerHTML = "";
                             }
                         }
                     } else {
                         boss[enemy_select].shield = false;
-                        boss[2].div.style.background = "black";
                     }
                     turns -= 1;
                     if(turns <= 0) {
@@ -969,11 +1030,20 @@ document.addEventListener('keydown', function (event) {
                         message_box.style.color = "transparent";
                         updateManagementPanel();
                     }
+                    break;
+                case 9:
+                    if (choice == 0) start();
+                    else {
+                        message("Stanął przed tobą sam bożek gotowy do walki.");
+                        setTimeout(() => {
+                            state = 1;
+                            message_box.style.backgroundColor = "transparent";
+                            message_box.style.color = "transparent";
+                            boss2();
+                        }, 3000);
+                    }
             }
-        } else if (event.keyCode == 49) {
-            state = 1;
-            boss1();
-        }
+        } 
     }
 });
 //test();
