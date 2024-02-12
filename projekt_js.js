@@ -408,7 +408,7 @@ function boss0() {
 }
 
 var ally_store_list = []
-new ally("player", 100, [0,2], 0, 100);
+new ally("Kapitan", 100, [0,2], 0, 100);
 new ally("Żołnierz", 150, [6,2,5], 1, 400, "Na jego rodzimej planecie był rewolucjonistą jednak po przegranj wojnie domowej musiał z tamtąd uciekać. Teraz jest najemnikiem.");
 new ally("Mag", 150, [3,1], 2, 700, "Człowiek rasy potrafiącej kontrolować mane. Odszedł ze swojej planety w poszukiwaniu przygód. Zrobi wszystko za kilka złotników.");
 new ally("Uzdrowiciel", 150, [7,4], 3, 300, "Pochodzi z pacyfistycznej planety. Nie potrafi walczyć ale z chęcią przyjmie pracę polegającą na ochronie ludzkiego życia.");
