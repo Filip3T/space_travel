@@ -14,7 +14,7 @@ hp_panel.id = "hp";
 
 var bars = ["stan statku", "morale", "paliwo", "racje"];
 var buttons = ["napraw", "kup", "pracuj", "wolne"];
-var ship = [1000,750,500,500,2000];
+var ship = [1000,750,500,500,400];
 
 var desc_message = "Zaczekać do następnego dnia?<br>Dzięki pracy załogi zyskam trochę gotówki."
 
@@ -286,7 +286,7 @@ function partyUpdate() {    //updating party members
         status.style.width = party[i].hp / party[i].maxhp * 100 + "%"; 
         progressBar.appendChild(status);
     }
-    skill_panel.innerHTML = "Skills:<br>";
+    skill_panel.innerHTML = "Skille:<br>";
     for(i=0;i<party[who].skills.length;i++) {
         if (skill_select == i) {
                 skill_panel.innerHTML += "<span style='color: rgb(197, 173, 137);'>" + skill_arr[party[who].skills[i]].name + "</span>";
@@ -395,7 +395,7 @@ function boss0() {
     createCombatPanel();
     partyUpdate();
     document.getElementById("main").appendChild(hp_panel);
-    mannequin = new limb("manekin", 400, 42, 45 , "images/dummy.png", "15vw" , "55vh");
+    mannequin = new limb("manekin", 150, 42, 45 , "images/dummy.png", "15vw" , "55vh");
     boss = [mannequin];
     boss_skills = ["nic"];
 }
@@ -432,8 +432,7 @@ function createAllyStoreMenu() {
     let ally_store = document.createElement("div");
     ally_store.id = "ally-store";
     ally_store.innerHTML = ally_store_list[ally_store_focus_x].name + "<br><br><span style='font-size: 1.5vw;'>Punkty Życia - " +
-    ally_store_list[ally_store_focus_x].maxhp + "<br>Punkty Many - " + ally_store_list[ally_store_focus_x].maxmp +
-    "<br>Cena - " + ally_store_list[ally_store_focus_x].price + "$<br><br>" +
+    ally_store_list[ally_store_focus_x].maxhp + "<br>Cena - " + ally_store_list[ally_store_focus_x].price + "$<br><br>" +
     ally_store_list[ally_store_focus_x].desc + "<br></span>";
 
     panel.appendChild(ally_store);
@@ -577,11 +576,11 @@ function enemyTurn() {
             case "tarcza":
                 let head = "";
                 for(i=0;i<boss.length;i++) {
-
+                    if(boss[i].name == "glowa") head = i;
                 }
-                boss[2].shield = true;
-                if (boss[2].hp + 15 > boss[2].maxhp) boss[2].hp = boss[2].maxhp;
-                else boss[2].hp += 15;
+                boss[i].shield = true;
+                if (boss[i].hp + 15 > boss[i].maxhp) boss[i].hp = boss[i].maxhp;
+                else boss[i].hp += 15;
                 desc_panel.innerHTML = boss[boss.length - turns].name + " tworzy tarcze i leczy glowe potwora."
                 break;
             case "nic":
@@ -666,7 +665,7 @@ function management_buttons_desc(select) {
 var message_start = ["Jesteście kosmicznymi piratami.", false, "Ostatnio ograbiliście kapliczke nieznanego bożka na dalece oddalonej primytywnej planecie.", false,
                      "Miesiąc od tamtego dnia w twoim sercu pojawia się złowrogie przeczucie.", false, "Słyszysz w głowie głos bożka mówiący że musisz zwrócić bezprawnie skradzione bogactwa.", false,
                      "Głos w wypadku niespełnienia żądań zapowiedział swój powrót za tydzień", false, "Postanawiasz wrócić na opuszczoną planete i zwrócić złoto", false,
-                     "Przed tobą daleka podróż", true, "Głos wraca.", false, "Bożek przklina cie twierdząc że jeżeli bogactwa nie zostaną zwrócone<br> za tydzień pośle na wasz statek straszliwą bestie", false,
+                     "Przed tobą daleka podróż", true, "Głos wraca.", false, "Bożek przeklina cie twierdząc że jeżeli bogactwa nie zostaną zwrócone<br> za tydzień pośle na wasz statek straszliwą bestie", false,
                      "Masz siedem dni", false, "Aby dolecieć do planety skąd ukradłeś złoto potrzbujesz jeszcze dwóch tygodni", false, "Wiedząc że walka z bestią jest nieunikniona postanwiasz potrenować na kukle", true,
                      "Uważasz że jesteś gotów", false, "Masz 7 dni", true, "Dzisiaj w nocy pojawić ma sie bestia", false, "Nie będe dzisiaj spał", true, "Zabiliśmy bestie", false,
                      "Za 7 dni dlocimy do celu", true, "Dolecoeliśmy do celu", false, "Czuje się dziwnie", false, "Pora na pożegnanie moich bogactw", false, "Czy zwrócić złoto?", true, "Oddałeś bogactwa", false,
@@ -849,8 +848,7 @@ document.addEventListener('keydown', function (event) {
                     if (boss[enemy_select].shield == false) {
                         if (boss[enemy_select].hp > Math.round(ongoing.effect * party[party.length - turns].boost)){
                             boss[enemy_select].hp -= Math.round(ongoing.effect * party[party.length - turns].boost);
-                            if (boss[enemy_select].shield == false) boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 10px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
-                            else boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 10px rgb(0, 255, 255))";
+                            boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 0px rgb(0, 255, 255))";
                             hp_panel.innerHTML = "";
                             if(boss[enemy_select].effect != -1) {
                                 if (party[boss[enemy_select].effect].hp > 0) {
