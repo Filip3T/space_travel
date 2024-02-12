@@ -1075,11 +1075,6 @@ document.addEventListener('keydown', function (event) {
                             state = 1; 
                     }
             }
-        } else if (event.keyCode == 49) {
-            weekOfJouney = 2;
-            dayOfJourney = 6;
-            createManagementPanel();
-            updateManagementPanel();
         }
     }
 });
