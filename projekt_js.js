@@ -97,7 +97,7 @@ function createManagementPanel() {
     if (dayOfJourney != 7) {
         button.innerHTML = "Nastepny dzien";
     } else {
-        button.innerHTML = "Zaśnij";
+        button.innerHTML = "Zaczekaj do nocy";
     }
     button.style.top = window.innerHeight * 0.85 + "px";
     button.style.marginLeft = "0px";
@@ -152,18 +152,21 @@ function updateManagementPanel() {
     if (state == 0) {
         for (i=0;i<4;i++) {
             let focus = document.getElementById(bars[i] + '-status');
-            focus.style.width = ship[i] / 10 + "%";
+            if (ship[i] >= 0) focus.style.width = ship[i] / 10 + "%";
+            else focus.style.width = "0%";
         }
-    } 
-    document.getElementById('money').innerHTML = ship[4] + "$";
-    document.getElementById('management-desc').innerHTML = desc_message;
+    }
+    if (state == 0) {
+        document.getElementById('money').innerHTML = ship[4] + "$";
+        document.getElementById('management-desc').innerHTML = desc_message;
+    }
 } //updateManagementPanel
 updateManagementPanel();
 
 function createStoreMenu() {
     panel.innerHTML = "";
     let heights = [0,0.2,0.4,0.7];
-    let nazwy = ["paliwo 10% - 100$", "racje 10% - 200$", "najemnicy - menu", "wstecz"];
+    let nazwy = ["paliwo 10% - 100$", "racje 20% - 200$", "najemnicy - menu", "wstecz"];
     for(i=0;i<4;i++) {
         let button = document.createElement("div");
         button.classList.add("management-button");
@@ -217,11 +220,12 @@ function createCombatPanel() {    //creating a panel for combat choices
     if (panel != null) {
         panel.remove();
     }
-    document.getElementById("management-desc").remove();
-    document.getElementById("desc-fade").remove();
-    document.getElementById("money").remove();
-
-    document.getElementById("management-fade").remove();
+    if (state == 0) {
+        document.getElementById("management-desc").remove();
+        document.getElementById("desc-fade").remove();
+        document.getElementById("money").remove();
+        document.getElementById("management-fade").remove();
+    }
     panel = document.createElement("div");
     
     panel.style.top = window.innerHeight * 0.7 + "px";
@@ -286,7 +290,7 @@ function partyUpdate() {    //updating party members
         status.style.width = party[i].hp / party[i].maxhp * 100 + "%"; 
         progressBar.appendChild(status);
     }
-    skill_panel.innerHTML = "Skille:<br>";
+    skill_panel.innerHTML = "Skile:<br>";
     for(i=0;i<party[who].skills.length;i++) {
         if (skill_select == i) {
                 skill_panel.innerHTML += "<span style='color: rgb(197, 173, 137);'>" + skill_arr[party[who].skills[i]].name + "</span>";
@@ -402,9 +406,9 @@ function boss0() {
 
 var ally_store_list = []
 new ally("player", 100, [0,2], 0, 100);
-new ally("Żołnierz", 150, [6,2,5], 1, 500, "opis żołnierza");
-new ally("Mag", 150, [3,1], 2, 500, "opis maga");
-new ally("Uzdrowiciel", 150, [7,4], 3, 500, "opis uzdrowiciela");
+new ally("Żołnierz", 150, [6,2,5], 1, 400, "Na jego rodzimej planecie był rewolucjonistą jednak po przegranj wojnie domowej musiał z tamtąd uciekać. Teraz jest najemnikiem.");
+new ally("Mag", 150, [3,1], 2, 700, "Człowiek rasy potrafiącej kontrolować mane. Odszedł ze swojej planety w poszukiwaniu przygód. Zrobi wszystko za kilka złotników.");
+new ally("Uzdrowiciel", 150, [7,4], 3, 300, "Pochodzi z pacyfistycznej planety. Nie potrafi walczyć ale z chęcią przyjmie pracę polegającą na ochronie ludzkiego życia.");
 
 var ally_store_focus_x = 1;
 var ally_store_focus_y = 1;
@@ -414,13 +418,14 @@ var choice = 1;
 function createChoice() {
     state = 9;
     document.getElementById("main").innerHTML = "";
+    document.body.style.background = "black";
     let choices = ["tak", "-", "nie"];
     for(i=0;i<3;i++) {
         let option = document.createElement("div");
         option.style.left = (window.innerWidth * 0.33 / 2 + (window.innerWidth * 0.33 * i)) - window.innerWidth * 0.04 + "px";
         option.style.top = window.innerHeight / 2 + "px";
-        if (choice == i) option.style.color = "red";
-        else option.style.color = "gray";
+        if (choice == i) option.style.color = "white";
+        else option.style.color = "rgb(80, 80, 80)";
         option.style.fontSize = "4vw";
         option.innerHTML = choices[i];
         document.getElementById("main").appendChild(option);
@@ -459,6 +464,12 @@ function createAllyStoreMenu() {
 }
 
 function nextDay() {
+    let buttons = ["button-0","button-1","button-2","button-3"]
+    for(i=0;i<buttons.length;i++) {
+        document.getElementById(buttons[i]).style.border = "5px solid rgb(107, 87, 70)"
+    }
+    document.getElementById("next_day").style.border = "5px solid rgb(197, 173, 137)";
+    select_y = 1;
     turn = false;
     let fade = document.getElementById('fade');
     fade.style.backgroundColor = "black";
@@ -547,6 +558,12 @@ function enemyTurn() {
                     party[target].protected = false;
                 } else {
                     party[target].hp -= 40;
+                    if (party[target].hp <= 0) party.splice(target, 1)
+                    if (party.length == 0) {
+                        fade.style.backgroundColor = "black";
+                        fade.innerHTML = "Nie żyjesz.";
+                        state = 4;
+                    }
                     desc_panel.innerHTML = boss[boss.length - turns].name + " używa ciosu.<br>" +
                     party[target].name + " traci 40PŻ.";
                 }
@@ -578,9 +595,9 @@ function enemyTurn() {
                 for(i=0;i<boss.length;i++) {
                     if(boss[i].name == "glowa") head = i;
                 }
-                boss[i].shield = true;
-                if (boss[i].hp + 15 > boss[i].maxhp) boss[i].hp = boss[i].maxhp;
-                else boss[i].hp += 15;
+                boss[head].shield = true;
+                if (boss[head].hp + 15 > boss[head].maxhp) boss[head].hp = boss[head].maxhp;
+                else boss[head].hp += 15;
                 desc_panel.innerHTML = boss[boss.length - turns].name + " tworzy tarcze i leczy glowe potwora."
                 break;
             case "nic":
@@ -668,8 +685,8 @@ var message_start = ["Jesteście kosmicznymi piratami.", false, "Ostatnio ograbi
                      "Przed tobą daleka podróż", true, "Głos wraca.", false, "Bożek przeklina cie twierdząc że jeżeli bogactwa nie zostaną zwrócone<br> za tydzień pośle na wasz statek straszliwą bestie", false,
                      "Masz siedem dni", false, "Aby dolecieć do planety skąd ukradłeś złoto potrzbujesz jeszcze dwóch tygodni", false, "Wiedząc że walka z bestią jest nieunikniona postanwiasz potrenować na kukle", true,
                      "Uważasz że jesteś gotów", false, "Masz 7 dni", true, "Dzisiaj w nocy pojawić ma sie bestia", false, "Nie będe dzisiaj spał", true, "Zabiliśmy bestie", false,
-                     "Za 7 dni dlocimy do celu", true, "Dolecoeliśmy do celu", false, "Czuje się dziwnie", false, "Pora na pożegnanie moich bogactw", false, "Czy zwrócić złoto?", true, "Oddałeś bogactwa", false,
-                     "udało ci się przeżyć", false, "KONIEC", false];
+                     "Za 7 dni dolecimy do celu", true, "Dolecoeliśmy do celu", false, "Czuje się dziwnie", false, "Pora na pożegnanie moich bogactw", false, "Czy zwrócić złoto?", true, "Oddałeś bogactwa", false,
+                     "udało ci się przeżyć", false, "KONIEC", 2];
 var message_start_i = 0;
 
 function start() {
@@ -779,7 +796,7 @@ document.addEventListener('keydown', function (event) {
                     createAllyStoreMenu();
                     break;
                 case 9:
-                    if(choice != 0) choice--
+                    if(choice != 0) choice--;
                     createChoice();
             }
         } else if (event.keyCode == 38) { // Up
@@ -868,19 +885,23 @@ document.addEventListener('keydown', function (event) {
                             boss.splice(enemy_select, 1);
                             enemy_select = 0;
                             if (boss.length == 0) {
+                                turns = 0;
                                 document.body.style.backgroundImage = "url('images/background.png')";
                                 message_start_i += 2;
-                                state = 8;
-                                start();
-                                if (weekOfJouney == 1) {
-                                    
-                                }
+                                state = 8;            
                                 weekOfJouney++;
                                 dayOfJourney = 1;
                                 select_x = 0;
                                 select_y = 0;
                                 createManagementPanel();
                                 updateManagementPanel();
+                                let buttons = ["button-0","button-1","button-2","button-3"]
+                                for(i=0;i<buttons.length;i++) {
+                                    document.getElementById(buttons[i]).style.border = "5px solid rgb(107, 87, 70)"
+                                }
+                                document.getElementById("next_day").style.border = "5px solid rgb(197, 173, 137)";
+                                select_y = 1;
+                                start();
                             } else {
                                 if (boss[enemy_select].shield == false) boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 0px hsl(" + (boss[enemy_select].hp / boss[enemy_select].maxhp) * 120 + ", 100%, 50%))";
                                 else boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 0px rgb(0, 255, 255))";
@@ -1019,29 +1040,40 @@ document.addEventListener('keydown', function (event) {
                     partyUpdate();
                     break;
                 case 8:
-                    if(!message_start[message_start_i+1]) {
-                        message_start_i += 2;
+                    if(message_start[message_start_i+1] == false) {
+                        message_start_i += 2
                         start();
-                    } else {
-                        state = 0;
+                    } else if (message_start[message_start_i+1] != 2){
+                        if (weekOfJouney == 2 && dayOfJourney == 7) {
+                            state = 9;
+                            createChoice();
+                        } else state = 0;
                         message_box.style.backgroundColor = "transparent";
                         message_box.style.color = "transparent";
                         updateManagementPanel();
-                    }
+                    } 
                     break;
                 case 9:
-                    if (choice == 0) start();
-                    else {
+                    message_start_i += 2;
+                    if (choice == 0) {
+                        document.getElementById("main").innerHTML = "";
+                        start();
+                        state = 8;
+                    }
+                    else if (choice == 2) {
+                        document.getElementById('main').innerHTML = "";
                         message("Stanął przed tobą sam bożek gotowy do walki.");
                         setTimeout(() => {
-                            state = 1;
                             message_box.style.backgroundColor = "transparent";
                             message_box.style.color = "transparent";
+                            createCombatPanel();
+                            partyUpdate();
                             boss2();
+                            state = 1; 
                         }, 3000);
                     }
             }
-        } 
+        }
     }
 });
 //test();
