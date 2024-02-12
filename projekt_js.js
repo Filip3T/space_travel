@@ -914,6 +914,7 @@ document.addEventListener('keydown', function (event) {
                     } else {
                         boss[enemy_select].shield = false;
                     }
+                    boss[enemy_select].div.style.filter = "drop-shadow(0px 0px 0px rgb(0, 255, 255))";
                     turns -= 1;
                     if(turns <= 0) {
                         turns = boss.length;
