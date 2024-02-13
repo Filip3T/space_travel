@@ -1,3 +1,5 @@
+Grafiki kradzione z miejsc wszelkich.
+
 Sterowanie:
 Wszystko robi się strzałkami. Spacją wybieramy opcje, która nas interesuje. W menu sklepu z najemnikami strzałkami lewo prawo możemy przełączać się pomiędzy różnymi najemnikami. Podczas walki zdolności wybieramy strzałkami góra dół, a cel strzałkami lewo prawo lub góra dół, jeżeli celem zdolności jest towarzysz. Spacją zaznaczamy przeciwnika lub towarzysza, na którym wykorzystać chcemy daną zdolność.
 Cel:
